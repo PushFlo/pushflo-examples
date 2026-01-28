@@ -1,0 +1,202 @@
+_type: export
+__export_format: 4
+__export_date: 2025-01-26T12:00:00.000Z
+__export_source: insomnia.desktop.app
+resources:
+  - _id: wrk_pushflo
+    created: 1706000000000
+    description: PushFlo real-time messaging API
+    modified: 1706000000000
+    name: PushFlo API
+    parentId: null
+    scope: collection
+    _type: workspace
+
+  - _id: env_base
+    color: null
+    created: 1706000000000
+    data:
+      base_url: https://api.pushflo.dev
+      publish_key: pub_xxxxxxxxxxxxx
+      secret_key: sec_xxxxxxxxxxxxx
+    dataPropertyOrder:
+      "&": ["base_url", "publish_key", "secret_key"]
+    isPrivate: false
+    metaSortKey: 1706000000000
+    modified: 1706000000000
+    name: Base Environment
+    parentId: wrk_pushflo
+    _type: environment
+
+  - _id: fld_auth
+    created: 1706000000000
+    description: Authentication endpoints
+    environment: {}
+    metaSortKey: -1
+    modified: 1706000000000
+    name: Authentication
+    parentId: wrk_pushflo
+    _type: request_group
+
+  - _id: req_token
+    authentication:
+      type: bearer
+      token: "{{ _.publish_key }}"
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "publishKey": "{{ _.publish_key }}",
+          "clientId": "insomnia-client"
+        }
+    created: 1706000000000
+    description: Generate a JWT token for WebSocket connections
+    headers:
+      - name: Content-Type
+        value: application/json
+    metaSortKey: -1
+    method: POST
+    modified: 1706000000000
+    name: Generate Connection Token
+    parameters: []
+    parentId: fld_auth
+    url: "{{ _.base_url }}/api/v1/auth/token"
+    _type: request
+
+  - _id: fld_channels
+    created: 1706000000000
+    description: Channel management
+    environment: {}
+    metaSortKey: 0
+    modified: 1706000000000
+    name: Channels
+    parentId: wrk_pushflo
+    _type: request_group
+
+  - _id: req_list_channels
+    authentication:
+      type: bearer
+      token: "{{ _.secret_key }}"
+    body: {}
+    created: 1706000000000
+    description: List all channels
+    headers: []
+    metaSortKey: -1
+    method: GET
+    modified: 1706000000000
+    name: List Channels
+    parameters:
+      - name: page
+        value: "1"
+        disabled: true
+      - name: pageSize
+        value: "25"
+        disabled: true
+    parentId: fld_channels
+    url: "{{ _.base_url }}/api/v1/channels"
+    _type: request
+
+  - _id: req_create_channel
+    authentication:
+      type: bearer
+      token: "{{ _.secret_key }}"
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "name": "My Channel",
+          "slug": "my-channel",
+          "description": "Channel for real-time updates"
+        }
+    created: 1706000000000
+    description: Create a new channel
+    headers:
+      - name: Content-Type
+        value: application/json
+    metaSortKey: 0
+    method: POST
+    modified: 1706000000000
+    name: Create Channel
+    parameters: []
+    parentId: fld_channels
+    url: "{{ _.base_url }}/api/v1/channels"
+    _type: request
+
+  - _id: req_get_channel
+    authentication:
+      type: bearer
+      token: "{{ _.secret_key }}"
+    body: {}
+    created: 1706000000000
+    description: Get channel details
+    headers: []
+    metaSortKey: 1
+    method: GET
+    modified: 1706000000000
+    name: Get Channel
+    parameters: []
+    parentId: fld_channels
+    url: "{{ _.base_url }}/api/v1/channels/my-channel"
+    _type: request
+
+  - _id: fld_messages
+    created: 1706000000000
+    description: Message publishing and history
+    environment: {}
+    metaSortKey: 1
+    modified: 1706000000000
+    name: Messages
+    parentId: wrk_pushflo
+    _type: request_group
+
+  - _id: req_publish
+    authentication:
+      type: bearer
+      token: "{{ _.secret_key }}"
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "eventType": "notification",
+          "clientId": "insomnia",
+          "content": {
+            "message": "Hello from Insomnia!",
+            "timestamp": "{{ _.now }}"
+          }
+        }
+    created: 1706000000000
+    description: Publish a message to a channel
+    headers:
+      - name: Content-Type
+        value: application/json
+    metaSortKey: -1
+    method: POST
+    modified: 1706000000000
+    name: Publish Message
+    parameters: []
+    parentId: fld_messages
+    url: "{{ _.base_url }}/api/v1/channels/my-channel/messages"
+    _type: request
+
+  - _id: req_history
+    authentication:
+      type: bearer
+      token: "{{ _.secret_key }}"
+    body: {}
+    created: 1706000000000
+    description: Get message history
+    headers: []
+    metaSortKey: 0
+    method: GET
+    modified: 1706000000000
+    name: Get Message History
+    parameters:
+      - name: page
+        value: "1"
+        disabled: true
+      - name: pageSize
+        value: "50"
+        disabled: true
+    parentId: fld_messages
+    url: "{{ _.base_url }}/api/v1/channels/my-channel/messages"
+    _type: request

@@ -1,0 +1,28 @@
+{
+  "name": "pushflo-examples",
+  "version": "1.0.0",
+  "description": "Official examples and starter templates for PushFlo",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --ext .ts,.tsx,.js,.jsx .",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "pushflo",
+    "realtime",
+    "websocket",
+    "examples"
+  ],
+  "author": "PushFlo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pushflo/examples.git"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.0",
+    "eslint": "8.56.0",
+    "prettier": "3.2.4",
+    "typescript": "5.3.3"
+  }
+}

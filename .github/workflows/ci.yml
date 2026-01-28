@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  mock-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: shared/mock-server/package-lock.json
+
+      - name: Install mock server dependencies
+        working-directory: shared/mock-server
+        run: npm ci
+
+      - name: Build mock server
+        working-directory: shared/mock-server
+        run: npm run build
+
+      - name: Upload mock server artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mock-server
+          path: shared/mock-server/dist
+
+  test-core:
+    needs: mock-server
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [hello-world, vanilla-js]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download mock server
+        uses: actions/download-artifact@v4
+        with:
+          name: mock-server
+          path: shared/mock-server/dist
+
+      - name: Start mock server
+        working-directory: shared/mock-server
+        run: |
+          npm ci --production
+          node dist/server.js &
+          sleep 3
+
+      - name: Install example dependencies
+        working-directory: core/${{ matrix.example }}
+        run: npm ci
+
+      - name: Run smoke tests
+        working-directory: core/${{ matrix.example }}
+        run: npm test
+        env:
+          PUSHFLO_BASE_URL: http://localhost:3001
+          PUSHFLO_PUBLISH_KEY: pub_test_key
+          PUSHFLO_SECRET_KEY: sec_test_key
+
+  test-frameworks:
+    needs: mock-server
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [nextjs, express, react-vite]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download mock server
+        uses: actions/download-artifact@v4
+        with:
+          name: mock-server
+          path: shared/mock-server/dist
+
+      - name: Start mock server
+        working-directory: shared/mock-server
+        run: |
+          npm ci --production
+          node dist/server.js &
+          sleep 3
+
+      - name: Install example dependencies
+        working-directory: frameworks/${{ matrix.example }}
+        run: npm ci
+
+      - name: Build example
+        working-directory: frameworks/${{ matrix.example }}
+        run: npm run build --if-present
+
+      - name: Run smoke tests
+        working-directory: frameworks/${{ matrix.example }}
+        run: npm test
+        env:
+          PUSHFLO_BASE_URL: http://localhost:3001
+          PUSHFLO_PUBLISH_KEY: pub_test_key
+          PUSHFLO_SECRET_KEY: sec_test_key
+          NEXT_PUBLIC_PUSHFLO_PUBLISH_KEY: pub_test_key
+          NEXT_PUBLIC_PUSHFLO_BASE_URL: http://localhost:3001
+          VITE_PUSHFLO_PUBLISH_KEY: pub_test_key
+          VITE_PUSHFLO_BASE_URL: http://localhost:3001
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint --if-present

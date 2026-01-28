@@ -1,0 +1,83 @@
+name: Weekly Test
+
+on:
+  schedule:
+    # Run every Monday at 9:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  test-all:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - category: core
+            example: hello-world
+          - category: core
+            example: vanilla-js
+          - category: frameworks
+            example: nextjs
+          - category: frameworks
+            example: express
+          - category: frameworks
+            example: react-vite
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install mock server
+        working-directory: shared/mock-server
+        run: npm ci
+
+      - name: Build and start mock server
+        working-directory: shared/mock-server
+        run: |
+          npm run build
+          node dist/server.js &
+          sleep 3
+
+      - name: Install example dependencies
+        working-directory: ${{ matrix.category }}/${{ matrix.example }}
+        run: npm ci
+
+      - name: Build example
+        working-directory: ${{ matrix.category }}/${{ matrix.example }}
+        run: npm run build --if-present
+
+      - name: Run tests
+        working-directory: ${{ matrix.category }}/${{ matrix.example }}
+        run: npm test
+        env:
+          PUSHFLO_BASE_URL: http://localhost:3001
+          PUSHFLO_PUBLISH_KEY: pub_test_key
+          PUSHFLO_SECRET_KEY: sec_test_key
+          NEXT_PUBLIC_PUSHFLO_PUBLISH_KEY: pub_test_key
+          NEXT_PUBLIC_PUSHFLO_BASE_URL: http://localhost:3001
+          VITE_PUSHFLO_PUBLISH_KEY: pub_test_key
+          VITE_PUSHFLO_BASE_URL: http://localhost:3001
+
+  notify-on-failure:
+    needs: test-all
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create issue on failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Weekly test failure - ${new Date().toISOString().split('T')[0]}`
+            const body = `The weekly scheduled test run has failed. Please check the [workflow run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}) for details.`
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['bug', 'ci']
+            })

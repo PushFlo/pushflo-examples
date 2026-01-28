@@ -1,0 +1,211 @@
+{
+  "info": {
+    "name": "PushFlo API",
+    "description": "PushFlo real-time messaging API collection.\n\nGet your API keys at https://console.pushflo.dev",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{secret_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.pushflo.dev",
+      "type": "string"
+    },
+    {
+      "key": "publish_key",
+      "value": "pub_xxxxxxxxxxxxx",
+      "type": "string"
+    },
+    {
+      "key": "secret_key",
+      "value": "sec_xxxxxxxxxxxxx",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Generate Connection Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publishKey\": \"{{publish_key}}\",\n  \"clientId\": \"postman-client\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "token"]
+            },
+            "description": "Generate a JWT token for WebSocket connections."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Channels",
+      "item": [
+        {
+          "name": "List Channels",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "25",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all channels for your organization."
+          }
+        },
+        {
+          "name": "Create Channel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Channel\",\n  \"slug\": \"my-channel\",\n  \"description\": \"Channel for real-time updates\",\n  \"isPrivate\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels"]
+            },
+            "description": "Create a new channel. Requires secret key."
+          }
+        },
+        {
+          "name": "Get Channel",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels/my-channel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels", "my-channel"]
+            },
+            "description": "Get details of a specific channel."
+          }
+        },
+        {
+          "name": "Update Channel",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Channel Name\",\n  \"description\": \"New description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels/my-channel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels", "my-channel"]
+            },
+            "description": "Update a channel. Requires secret key."
+          }
+        },
+        {
+          "name": "Delete Channel",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels/my-channel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels", "my-channel"]
+            },
+            "description": "Delete a channel and all its messages. Requires secret key."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Publish Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventType\": \"user.signup\",\n  \"clientId\": \"postman\",\n  \"content\": {\n    \"userId\": \"user_123\",\n    \"email\": \"user@example.com\",\n    \"name\": \"John Doe\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels/my-channel/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels", "my-channel", "messages"]
+            },
+            "description": "Publish a message to a channel. Requires secret key."
+          }
+        },
+        {
+          "name": "Get Message History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/channels/my-channel/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "channels", "my-channel", "messages"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get message history for a channel."
+          }
+        }
+      ]
+    }
+  ]
+}
