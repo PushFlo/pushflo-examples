@@ -238,6 +238,7 @@ app.get('/health', (_req, res) => {
 });
 
 // Error handling
+// eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   console.error('Error:', err.message);
   res.status(500).json({ success: false, error: 'Internal server error' });
