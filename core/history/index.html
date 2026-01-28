@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PushFlo Message History</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 { margin-bottom: 0.5rem; }
+    .subtitle { color: #666; margin-bottom: 2rem; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    .status.connected { background: #d1fae5; color: #065f46; }
+    .status.connecting { background: #fef3c7; color: #92400e; }
+    .status.disconnected { background: #f3f4f6; color: #4b5563; }
+    .status.loading { background: #dbeafe; color: #1e40af; }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .connected .dot { background: #10b981; }
+    .connecting .dot { background: #f59e0b; animation: pulse 1s infinite; }
+    .disconnected .dot { background: #9ca3af; }
+    .loading .dot { background: #3b82f6; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #d1d5db; }
+
+    .pagination-info {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+
+    #messages {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 400px;
+      max-height: 500px;
+      overflow-y: auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .message {
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+    .message.historical {
+      background: #f9fafb;
+    }
+    .message.realtime {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+    .message-source {
+      font-size: 0.625rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 9999px;
+    }
+    .message.historical .message-source {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+    .message.realtime .message-source {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .message-content {
+      font-size: 1rem;
+    }
+    .message-id {
+      font-size: 0.625rem;
+      color: #d1d5db;
+      margin-top: 0.5rem;
+      font-family: monospace;
+    }
+    .empty {
+      color: #9ca3af;
+      text-align: center;
+      padding: 2rem;
+    }
+    .load-more {
+      text-align: center;
+      padding: 1rem;
+    }
+    .setup {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #eff6ff;
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .setup code {
+      background: #dbeafe;
+      padding: 0.125rem 0.25rem;
+      border-radius: 2px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <h1>PushFlo Message History</h1>
+  <p class="subtitle">Load historical messages with pagination + real-time updates</p>
+
+  <div id="status" class="status disconnected">
+    <span class="dot"></span>
+    <span id="statusText">Disconnected</span>
+  </div>
+
+  <div class="controls">
+    <button id="loadHistory" class="btn-primary">Load History</button>
+    <button id="loadMore" class="btn-secondary" disabled>Load More</button>
+    <button id="clearMessages" class="btn-secondary">Clear</button>
+  </div>
+
+  <div id="paginationInfo" class="pagination-info"></div>
+
+  <div id="messages">
+    <div class="empty">Click "Load History" to fetch messages from the server</div>
+  </div>
+
+  <div class="setup">
+    <strong>To populate messages:</strong><br>
+    1. Add your <code>PUSHFLO_SECRET_KEY</code> to <code>.env</code><br>
+    2. Run <code>npm start -- --publish 20</code> to publish sample messages<br>
+    3. Click "Load History" above to see paginated history
+  </div>
+
+  <script type="module">
+    // IMPORTANT: Replace with your keys
+    const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE' // e.g., 'pub_xxxxxxxxxxxxx'
+    const SECRET_KEY = 'YOUR_SECRET_KEY_HERE' // e.g., 'sec_xxxxxxxxxxxxx' (for history API)
+    const BASE_URL = 'https://api.pushflo.dev'
+    const CHANNEL = 'history-demo'
+    const PAGE_SIZE = 10
+
+    let currentPage = 1
+    let totalPages = 1
+    let totalMessages = 0
+    let ws = null
+    let loadedMessageIds = new Set()
+
+    // Update status display
+    function setStatus(state, text) {
+      const el = document.getElementById('status')
+      const textEl = document.getElementById('statusText')
+      el.className = `status ${state}`
+      textEl.textContent = text || state.charAt(0).toUpperCase() + state.slice(1)
+    }
+
+    // Update pagination info
+    function updatePaginationInfo() {
+      const info = document.getElementById('paginationInfo')
+      if (totalMessages === 0) {
+        info.textContent = ''
+      } else {
+        info.textContent = `Showing ${loadedMessageIds.size} of ${totalMessages} messages (Page ${currentPage} of ${totalPages})`
+      }
+
+      document.getElementById('loadMore').disabled = currentPage >= totalPages
+    }
+
+    // Format timestamp
+    function formatTime(timestamp) {
+      return new Date(timestamp).toLocaleString()
+    }
+
+    // Add message to display
+    function addMessage(message, isRealtime = false, prepend = false) {
+      if (loadedMessageIds.has(message.id)) {
+        return // Skip duplicates
+      }
+      loadedMessageIds.add(message.id)
+
+      const container = document.getElementById('messages')
+      const empty = container.querySelector('.empty')
+      if (empty) empty.remove()
+
+      const div = document.createElement('div')
+      div.className = `message ${isRealtime ? 'realtime' : 'historical'}`
+      div.dataset.id = message.id
+
+      const content = message.content || message.data || {}
+      const text = content.text || content.greeting || JSON.stringify(content)
+
+      div.innerHTML = `
+        <div class="message-header">
+          <span>${message.eventType || 'message'}</span>
+          <span class="message-source">${isRealtime ? 'LIVE' : 'HISTORY'}</span>
+          <span>${formatTime(message.timestamp)}</span>
+        </div>
+        <div class="message-content">${text}</div>
+        <div class="message-id">ID: ${message.id}</div>
+      `
+
+      if (prepend) {
+        // Find the divider or first historical message
+        const divider = container.querySelector('.divider')
+        if (divider) {
+          container.insertBefore(div, divider)
+        } else {
+          container.insertBefore(div, container.firstChild)
+        }
+      } else {
+        container.appendChild(div)
+      }
+    }
+
+    // Add divider between real-time and historical messages
+    function addDivider() {
+      const container = document.getElementById('messages')
+      const existingDivider = container.querySelector('.divider')
+      if (existingDivider) return
+
+      const divider = document.createElement('div')
+      divider.className = 'divider'
+      divider.textContent = 'Historical Messages'
+      container.appendChild(divider)
+    }
+
+    // Clear all messages
+    function clearMessages() {
+      const container = document.getElementById('messages')
+      container.innerHTML = '<div class="empty">Click "Load History" to fetch messages from the server</div>'
+      loadedMessageIds.clear()
+      currentPage = 1
+      totalPages = 1
+      totalMessages = 0
+      updatePaginationInfo()
+    }
+
+    // Fetch message history from server
+    async function fetchHistory(page = 1) {
+      if (SECRET_KEY === 'YOUR_SECRET_KEY_HERE') {
+        alert('Please edit index.html and add your SECRET_KEY')
+        return
+      }
+
+      setStatus('loading', 'Loading history...')
+
+      try {
+        const url = `${BASE_URL}/api/v1/channels/${CHANNEL}/messages?page=${page}&pageSize=${PAGE_SIZE}`
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${SECRET_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+        const { messages, pagination } = result.data || result
+
+        currentPage = pagination.page
+        totalPages = pagination.totalPages
+        totalMessages = pagination.total
+
+        // Add divider before first historical messages if we have real-time messages
+        if (page === 1 && loadedMessageIds.size > 0) {
+          addDivider()
+        }
+
+        // Messages are returned newest first, display in same order
+        for (const msg of messages) {
+          addMessage(msg, false, false)
+        }
+
+        updatePaginationInfo()
+        setStatus('connected')
+
+      } catch (error) {
+        console.error('Error fetching history:', error)
+        setStatus('disconnected', 'Error: ' + error.message)
+      }
+    }
+
+    // Load next page
+    async function loadMore() {
+      if (currentPage < totalPages) {
+        await fetchHistory(currentPage + 1)
+      }
+    }
+
+    // Connect to WebSocket for real-time updates
+    async function connectWebSocket() {
+      if (PUBLISH_KEY === 'YOUR_PUBLISH_KEY_HERE') {
+        console.log('Skipping WebSocket: no publish key configured')
+        return
+      }
+
+      setStatus('connecting')
+
+      try {
+        // Get connection token
+        const tokenRes = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ publishKey: PUBLISH_KEY }),
+        })
+
+        if (!tokenRes.ok) throw new Error('Failed to get token')
+        const { data: { token, endpoint } } = await tokenRes.json()
+
+        // Connect WebSocket
+        const wsUrl = endpoint.replace('http', 'ws') + `?token=${token}`
+        ws = new WebSocket(wsUrl)
+
+        ws.onopen = () => console.log('WebSocket opened')
+
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data)
+
+          if (msg.type === 'connected') {
+            setStatus('connected', 'Connected (live)')
+            ws.send(JSON.stringify({ type: 'subscribe', channel: CHANNEL }))
+          }
+
+          if (msg.type === 'subscribed') {
+            console.log('Subscribed to:', msg.channel)
+          }
+
+          if (msg.type === 'message') {
+            // Add real-time message at the top
+            addMessage({
+              id: msg.id,
+              eventType: msg.eventType,
+              content: msg.data,
+              timestamp: msg.timestamp,
+            }, true, true)
+            totalMessages++
+            updatePaginationInfo()
+          }
+        }
+
+        ws.onerror = () => setStatus('disconnected', 'Connection error')
+        ws.onclose = () => {
+          setStatus('disconnected')
+          // Reconnect after 3 seconds
+          setTimeout(connectWebSocket, 3000)
+        }
+
+      } catch (error) {
+        console.error('WebSocket error:', error)
+        setStatus('disconnected')
+        setTimeout(connectWebSocket, 3000)
+      }
+    }
+
+    // Event listeners
+    document.getElementById('loadHistory').addEventListener('click', () => {
+      // Reset pagination when loading fresh
+      currentPage = 0
+      fetchHistory(1)
+    })
+
+    document.getElementById('loadMore').addEventListener('click', loadMore)
+    document.getElementById('clearMessages').addEventListener('click', clearMessages)
+
+    // Start WebSocket connection for real-time updates
+    connectWebSocket()
+  </script>
+</body>
+</html>

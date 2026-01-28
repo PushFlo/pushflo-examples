@@ -91,6 +91,54 @@ channels.set('hello', {
   updatedAt: new Date().toISOString(),
 })
 
+channels.set('presence:lobby', {
+  id: uuidv4(),
+  name: 'Presence Lobby',
+  slug: 'presence:lobby',
+  description: 'Presence tracking channel',
+  isPrivate: false,
+  metadata: null,
+  messageCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+})
+
+channels.set('history', {
+  id: uuidv4(),
+  name: 'History',
+  slug: 'history',
+  description: 'Message history channel',
+  isPrivate: false,
+  metadata: null,
+  messageCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+})
+
+channels.set('history-demo', {
+  id: uuidv4(),
+  name: 'History Demo',
+  slug: 'history-demo',
+  description: 'History demo channel',
+  isPrivate: false,
+  metadata: null,
+  messageCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+})
+
+channels.set('chat:general', {
+  id: uuidv4(),
+  name: 'General Chat',
+  slug: 'chat:general',
+  description: 'General chat room',
+  isPrivate: false,
+  metadata: null,
+  messageCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+})
+
 // Helper functions
 function success<T>(data: T, status = 200) {
   return { status, body: { success: true, data } }
@@ -487,6 +535,9 @@ server.listen(PORT, () => {
   console.log('  - notifications')
   console.log('  - chat')
   console.log('  - hello')
+  console.log('  - presence:lobby')
+  console.log('  - history')
+  console.log('  - chat:general')
   console.log('\nTest credentials:')
   console.log('  Publish key: pub_test_key')
   console.log('  Secret key:  sec_test_key')

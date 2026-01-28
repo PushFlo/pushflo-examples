@@ -1,0 +1,17 @@
+{
+  "name": "pushflo-presence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "serve": "npx serve -l 8080 .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pushflodev/sdk": "^1.0.2"
+  },
+  "devDependencies": {
+    "vitest": "1.2.2"
+  }
+}

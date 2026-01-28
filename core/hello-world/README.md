@@ -154,9 +154,9 @@ cp env.example .env
 
 ## Next Steps
 
-- [Vanilla JS](../vanilla-js) - Single HTML file example
-- [React + Vite](../../frameworks/react-vite) - Modern React setup
-- [Express backend](../../frameworks/express) - Full REST API
+- [Presence tracking](../presence) - Show online users
+- [Message history](../history) - Load previous messages
+- [Chat application](../../use-cases/chat-app) - Full chat example
 
 ## License
 

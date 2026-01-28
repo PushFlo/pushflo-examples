@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [hello-world, vanilla-js]
+        example: [hello-world, vanilla-js, presence, history]
     steps:
       - uses: actions/checkout@v4
 
@@ -120,6 +120,46 @@ jobs:
           NEXT_PUBLIC_PUSHFLO_BASE_URL: http://localhost:3001
           VITE_PUSHFLO_PUBLISH_KEY: pub_test_key
           VITE_PUSHFLO_BASE_URL: http://localhost:3001
+
+  test-use-cases:
+    needs: mock-server
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [chat-app]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download mock server
+        uses: actions/download-artifact@v4
+        with:
+          name: mock-server
+          path: shared/mock-server/dist
+
+      - name: Start mock server
+        working-directory: shared/mock-server
+        run: |
+          npm ci --production
+          node dist/server.js &
+          sleep 3
+
+      - name: Install example dependencies
+        working-directory: use-cases/${{ matrix.example }}
+        run: npm ci
+
+      - name: Run smoke tests
+        working-directory: use-cases/${{ matrix.example }}
+        run: npm test
+        env:
+          PUSHFLO_BASE_URL: http://localhost:3001
+          PUSHFLO_PUBLISH_KEY: pub_test_key
+          PUSHFLO_SECRET_KEY: sec_test_key
 
   lint:
     runs-on: ubuntu-latest

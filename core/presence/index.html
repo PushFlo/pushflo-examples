@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PushFlo Presence Tracking - Online Users</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 { margin-bottom: 0.5rem; }
+    .subtitle { color: #666; margin-bottom: 2rem; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    .status.connected { background: #d1fae5; color: #065f46; }
+    .status.connecting { background: #fef3c7; color: #92400e; }
+    .status.disconnected { background: #f3f4f6; color: #4b5563; }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .connected .dot { background: #10b981; }
+    .connecting .dot { background: #f59e0b; animation: pulse 1s infinite; }
+    .disconnected .dot { background: #9ca3af; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .online-count {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+    .online-count span {
+      color: #10b981;
+    }
+
+    #users {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 200px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    .user.leaving {
+      animation: slideOut 0.3s ease forwards;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(10px); }
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .user-info {
+      flex: 1;
+    }
+    .user-name {
+      font-weight: 500;
+      color: #1f2937;
+    }
+    .user-joined {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    .online-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: glow 2s infinite;
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+    }
+    .empty {
+      color: #9ca3af;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #activity {
+      margin-top: 1rem;
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .activity-title {
+      font-weight: 500;
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+    .activity-log {
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.875rem;
+    }
+    .activity-item {
+      padding: 0.25rem 0;
+      color: #6b7280;
+    }
+    .activity-item.join { color: #10b981; }
+    .activity-item.leave { color: #ef4444; }
+
+    .setup {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #eff6ff;
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .setup code {
+      background: #dbeafe;
+      padding: 0.125rem 0.25rem;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PushFlo Presence</h1>
+  <p class="subtitle">Real-time online user tracking</p>
+
+  <div id="status" class="status disconnected">
+    <span class="dot"></span>
+    <span id="statusText">Disconnected</span>
+  </div>
+
+  <div class="online-count">
+    <span id="userCount">0</span> users online
+  </div>
+
+  <div id="users">
+    <div class="empty">Waiting for users...</div>
+  </div>
+
+  <div id="activity">
+    <div class="activity-title">Activity Log</div>
+    <div class="activity-log" id="activityLog"></div>
+  </div>
+
+  <div class="setup">
+    <strong>To simulate presence:</strong><br>
+    1. Add your <code>PUSHFLO_SECRET_KEY</code> to <code>.env</code><br>
+    2. Run <code>npm start</code> in another terminal
+  </div>
+
+  <script type="module">
+    // IMPORTANT: Replace with your publish key or use environment variable
+    const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE' // e.g., 'pub_xxxxxxxxxxxxx'
+    const BASE_URL = 'https://api.pushflo.dev'
+    const CHANNEL = 'presence:lobby'
+
+    // Track online users locally
+    const onlineUsers = new Map()
+
+    // Update status display
+    function setStatus(state) {
+      const el = document.getElementById('status')
+      const text = document.getElementById('statusText')
+      el.className = `status ${state}`
+      text.textContent = state.charAt(0).toUpperCase() + state.slice(1)
+    }
+
+    // Update user count display
+    function updateUserCount() {
+      document.getElementById('userCount').textContent = onlineUsers.size
+    }
+
+    // Format time ago
+    function timeAgo(dateString) {
+      const seconds = Math.floor((new Date() - new Date(dateString)) / 1000)
+      if (seconds < 60) return 'just now'
+      const minutes = Math.floor(seconds / 60)
+      if (minutes < 60) return `${minutes}m ago`
+      const hours = Math.floor(minutes / 60)
+      return `${hours}h ago`
+    }
+
+    // Render users list
+    function renderUsers() {
+      const container = document.getElementById('users')
+
+      if (onlineUsers.size === 0) {
+        container.innerHTML = '<div class="empty">No users online</div>'
+        updateUserCount()
+        return
+      }
+
+      container.innerHTML = ''
+      const sortedUsers = Array.from(onlineUsers.values()).sort(
+        (a, b) => new Date(b.joinedAt) - new Date(a.joinedAt)
+      )
+
+      for (const user of sortedUsers) {
+        const div = document.createElement('div')
+        div.className = 'user'
+        div.id = `user-${user.userId}`
+        div.innerHTML = `
+          <div class="avatar">${user.avatar || user.userName.charAt(0).toUpperCase()}</div>
+          <div class="user-info">
+            <div class="user-name">${user.userName}</div>
+            <div class="user-joined">Joined ${timeAgo(user.joinedAt)}</div>
+          </div>
+          <div class="online-indicator"></div>
+        `
+        container.appendChild(div)
+      }
+
+      updateUserCount()
+    }
+
+    // Add activity log entry
+    function logActivity(type, message) {
+      const log = document.getElementById('activityLog')
+      const item = document.createElement('div')
+      item.className = `activity-item ${type}`
+      item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      log.insertBefore(item, log.firstChild)
+
+      // Keep only last 20 entries
+      while (log.children.length > 20) {
+        log.removeChild(log.lastChild)
+      }
+    }
+
+    // Handle presence state update (full sync)
+    function handlePresenceState(data) {
+      onlineUsers.clear()
+      for (const user of data.onlineUsers || []) {
+        onlineUsers.set(user.userId || user.id, {
+          userId: user.userId || user.id,
+          userName: user.userName || user.name,
+          avatar: user.avatar,
+          joinedAt: user.joinedAt || new Date().toISOString(),
+        })
+      }
+      renderUsers()
+      logActivity('state', `Synced ${onlineUsers.size} online users`)
+    }
+
+    // Handle user join
+    function handleUserJoin(data) {
+      onlineUsers.set(data.userId, {
+        userId: data.userId,
+        userName: data.userName,
+        avatar: data.avatar,
+        joinedAt: new Date().toISOString(),
+      })
+      renderUsers()
+      logActivity('join', `${data.userName} joined`)
+    }
+
+    // Handle user leave
+    function handleUserLeave(data) {
+      const userEl = document.getElementById(`user-${data.userId}`)
+      if (userEl) {
+        userEl.classList.add('leaving')
+        setTimeout(() => {
+          onlineUsers.delete(data.userId)
+          renderUsers()
+        }, 300)
+      } else {
+        onlineUsers.delete(data.userId)
+        renderUsers()
+      }
+      logActivity('leave', `${data.userName} left`)
+    }
+
+    // Connect to PushFlo
+    async function connect() {
+      if (PUBLISH_KEY === 'YOUR_PUBLISH_KEY_HERE') {
+        document.getElementById('users').innerHTML = `
+          <div class="empty" style="color: #ef4444;">
+            Please edit index.html and add your PUBLISH_KEY<br>
+            Get one at <a href="https://console.pushflo.dev">console.pushflo.dev</a>
+          </div>
+        `
+        return
+      }
+
+      setStatus('connecting')
+
+      try {
+        // Get connection token
+        const tokenRes = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ publishKey: PUBLISH_KEY }),
+        })
+
+        if (!tokenRes.ok) throw new Error('Failed to get token')
+        const { data: { token, endpoint } } = await tokenRes.json()
+
+        // Connect WebSocket
+        const wsUrl = endpoint.replace('http', 'ws') + `?token=${token}`
+        const ws = new WebSocket(wsUrl)
+
+        ws.onopen = () => console.log('WebSocket opened')
+
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data)
+
+          if (msg.type === 'connected') {
+            setStatus('connected')
+            // Subscribe to presence channel
+            ws.send(JSON.stringify({ type: 'subscribe', channel: CHANNEL }))
+            logActivity('state', 'Connected to PushFlo')
+          }
+
+          if (msg.type === 'subscribed') {
+            console.log('Subscribed to:', msg.channel)
+            logActivity('state', `Subscribed to ${msg.channel}`)
+          }
+
+          if (msg.type === 'message') {
+            switch (msg.eventType) {
+              case 'presence:state':
+                handlePresenceState(msg.data)
+                break
+              case 'user:join':
+                handleUserJoin(msg.data)
+                break
+              case 'user:leave':
+                handleUserLeave(msg.data)
+                break
+            }
+          }
+        }
+
+        ws.onerror = () => setStatus('error')
+        ws.onclose = () => {
+          setStatus('disconnected')
+          logActivity('state', 'Disconnected, reconnecting...')
+          // Reconnect after 3 seconds
+          setTimeout(connect, 3000)
+        }
+
+      } catch (error) {
+        console.error('Connection error:', error)
+        setStatus('disconnected')
+        setTimeout(connect, 3000)
+      }
+    }
+
+    // Start connection
+    connect()
+  </script>
+</body>
+</html>

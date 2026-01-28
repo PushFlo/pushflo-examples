@@ -225,9 +225,9 @@ const CONFIG = {
 
 ## Next Steps
 
-- [Hello World](../hello-world) - Add a Node.js publisher
-- [React + Vite](../../frameworks/react-vite) - Framework integration
-- [Express backend](../../frameworks/express) - REST API for publishing
+- [Presence tracking](../presence) - Show online users
+- [Message history](../history) - Load previous messages
+- [Chat application](../../use-cases/chat-app) - Full chat example
 
 ## License
 

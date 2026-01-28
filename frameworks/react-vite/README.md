@@ -193,8 +193,8 @@ Restart the dev server after adding environment variables.
 ## Next Steps
 
 - [Express backend](../express) - Set up a publishing server
-- [Next.js full-stack](../nextjs) - Server Actions integration
-- [Hello World](../../core/hello-world) - Minimal pub/sub example
+- [Presence tracking](../../core/presence) - Show online users
+- [Chat application](../../use-cases/chat-app) - Full chat example
 
 ## License
 

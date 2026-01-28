@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PushFlo Chat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="login-container">
+        <h1>PushFlo Chat</h1>
+        <p class="subtitle">Real-time messaging powered by PushFlo</p>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="nickname-input">Choose your nickname</label>
+            <input
+              type="text"
+              id="nickname-input"
+              placeholder="Enter nickname..."
+              maxlength="20"
+              autocomplete="off"
+              required
+            >
+          </div>
+          <button type="submit" class="btn btn-primary">Join Chat</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chat-screen" class="screen hidden">
+      <div class="chat-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <h2>Rooms</h2>
+          </div>
+          <nav class="room-list" id="room-list">
+            <!-- Rooms populated by JavaScript -->
+          </nav>
+          <div class="sidebar-footer">
+            <div class="user-info">
+              <span class="user-nickname" id="current-user"></span>
+              <button class="btn btn-small btn-outline" id="logout-btn">Leave</button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+          <header class="chat-header">
+            <div class="room-info">
+              <h3 id="current-room-name">General</h3>
+              <span class="room-description" id="current-room-description">General discussion</span>
+            </div>
+            <div class="connection-status" id="connection-status">
+              <span class="status-dot"></span>
+              <span class="status-text">Connecting...</span>
+            </div>
+          </header>
+
+          <div class="messages-container" id="messages-container">
+            <div class="messages-list" id="messages-list">
+              <!-- Messages populated by JavaScript -->
+            </div>
+          </div>
+
+          <div class="users-sidebar" id="users-sidebar">
+            <h4>Online Users</h4>
+            <ul class="users-list" id="users-list">
+              <!-- Users populated by JavaScript -->
+            </ul>
+          </div>
+
+          <footer class="chat-input-area">
+            <form id="message-form">
+              <input
+                type="text"
+                id="message-input"
+                placeholder="Type a message..."
+                maxlength="1000"
+                autocomplete="off"
+              >
+              <button type="submit" class="btn btn-primary" id="send-btn">Send</button>
+            </form>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

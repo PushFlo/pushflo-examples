@@ -1,0 +1,108 @@
+import { describe, it, expect } from 'vitest'
+
+const BASE_URL = process.env.PUSHFLO_BASE_URL || 'http://localhost:3001'
+const PUBLISH_KEY = process.env.PUSHFLO_PUBLISH_KEY || 'pub_test_key'
+const SECRET_KEY = process.env.PUSHFLO_SECRET_KEY || 'sec_test_key'
+
+describe('Presence Tracking Example', () => {
+  it('mock server health check', async () => {
+    const response = await fetch(`${BASE_URL}/health`)
+    expect(response.ok).toBe(true)
+  })
+
+  it('generates token for subscriber', async () => {
+    const response = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        publishKey: PUBLISH_KEY,
+        clientId: 'presence-test',
+      }),
+    })
+
+    expect(response.ok).toBe(true)
+
+    const data = await response.json()
+    expect(data.success).toBe(true)
+    expect(data.data.token).toBeTruthy()
+  })
+
+  it('publishes user join event', async () => {
+    const response = await fetch(`${BASE_URL}/api/v1/channels/presence:lobby/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SECRET_KEY}`,
+      },
+      body: JSON.stringify({
+        eventType: 'user:join',
+        clientId: 'test-server',
+        content: {
+          userId: 'user_test',
+          userName: 'Test User',
+          avatar: 'T',
+          onlineUsers: [
+            { userId: 'user_test', userName: 'Test User', avatar: 'T', joinedAt: new Date().toISOString() },
+          ],
+        },
+      }),
+    })
+
+    expect(response.ok).toBe(true)
+
+    const data = await response.json()
+    expect(data.success).toBe(true)
+    expect(data.data.id).toBeTruthy()
+  })
+
+  it('publishes user leave event', async () => {
+    const response = await fetch(`${BASE_URL}/api/v1/channels/presence:lobby/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SECRET_KEY}`,
+      },
+      body: JSON.stringify({
+        eventType: 'user:leave',
+        clientId: 'test-server',
+        content: {
+          userId: 'user_test',
+          userName: 'Test User',
+          onlineUsers: [],
+        },
+      }),
+    })
+
+    expect(response.ok).toBe(true)
+
+    const data = await response.json()
+    expect(data.success).toBe(true)
+    expect(data.data.id).toBeTruthy()
+  })
+
+  it('publishes presence state event', async () => {
+    const response = await fetch(`${BASE_URL}/api/v1/channels/presence:lobby/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SECRET_KEY}`,
+      },
+      body: JSON.stringify({
+        eventType: 'presence:state',
+        clientId: 'test-server',
+        content: {
+          onlineUsers: [
+            { userId: 'user_1', userName: 'Alice', avatar: 'A', joinedAt: new Date().toISOString() },
+            { userId: 'user_2', userName: 'Bob', avatar: 'B', joinedAt: new Date().toISOString() },
+          ],
+        },
+      }),
+    })
+
+    expect(response.ok).toBe(true)
+
+    const data = await response.json()
+    expect(data.success).toBe(true)
+    expect(data.data.id).toBeTruthy()
+  })
+})

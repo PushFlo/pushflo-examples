@@ -207,8 +207,8 @@ curl -X POST http://localhost:3000/channels \
 ## Next Steps
 
 - [React frontend](../react-vite) - Connect a React app
-- [Next.js full-stack](../nextjs) - Server Actions integration
-- [Hello World](../../core/hello-world) - Minimal pub/sub example
+- [Presence tracking](../../core/presence) - Show online users
+- [Chat application](../../use-cases/chat-app) - Full chat example
 
 ## License
 
