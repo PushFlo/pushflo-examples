@@ -74,7 +74,7 @@ function App() {
 
       <div className="links">
         <a
-          href="https://github.com/pushflo/examples/tree/main/frameworks/react-vite"
+          href="https://github.com/PushFlo/pushflo-examples/tree/main/frameworks/react-vite"
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -1,7 +1,7 @@
 # PushFlo Vanilla JS Example
 
-[![Open in CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/pushflo/examples/tree/main/core/vanilla-js)
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pushflo/examples/tree/main/core/vanilla-js)
+[![Open in CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/PushFlo/pushflo-examples/tree/main/core/vanilla-js)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/PushFlo/pushflo-examples/tree/main/core/vanilla-js)
 
 A single HTML file demonstrating PushFlo real-time subscriptions with no build tools or framework dependencies.
 
@@ -35,7 +35,7 @@ A single HTML file demonstrating PushFlo real-time subscriptions with no build t
 
 ```bash
 # Clone this example
-npx degit pushflo/examples/core/vanilla-js my-vanilla-app
+npx degit PushFlo/pushflo-examples/core/vanilla-js my-vanilla-app
 cd my-vanilla-app
 
 # Edit index.html and add your publish key

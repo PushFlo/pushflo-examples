@@ -18,7 +18,7 @@ A REST API backend demonstrating PushFlo integration with Express.js and TypeScr
 
 ```bash
 # Clone this example
-npx degit pushflo/examples/frameworks/express my-express-api
+npx degit PushFlo/pushflo-examples/frameworks/express my-express-api
 cd my-express-api
 
 # Install dependencies

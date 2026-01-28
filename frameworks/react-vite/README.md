@@ -1,7 +1,7 @@
 # PushFlo + React + Vite Example
 
-[![Open in CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/pushflo/examples/tree/main/frameworks/react-vite)
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pushflo/examples/tree/main/frameworks/react-vite)
+[![Open in CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/PushFlo/pushflo-examples/tree/main/frameworks/react-vite)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/PushFlo/pushflo-examples/tree/main/frameworks/react-vite)
 
 A modern React application with Vite demonstrating real-time PushFlo subscriptions.
 
@@ -21,7 +21,7 @@ A modern React application with Vite demonstrating real-time PushFlo subscriptio
 
 ```bash
 # Clone this example
-npx degit pushflo/examples/frameworks/react-vite my-react-app
+npx degit PushFlo/pushflo-examples/frameworks/react-vite my-react-app
 cd my-react-app
 
 # Install dependencies

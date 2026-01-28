@@ -1,6 +1,6 @@
 # PushFlo Examples
 
-[![CI](https://github.com/pushflo/examples/actions/workflows/ci.yml/badge.svg)](https://github.com/pushflo/examples/actions/workflows/ci.yml)
+[![CI](https://github.com/PushFlo/pushflo-examples/actions/workflows/ci.yml/badge.svg)](https://github.com/PushFlo/pushflo-examples/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Official examples and starter templates for [PushFlo](https://pushflo.dev) - real-time messaging built on Cloudflare's edge network.
@@ -9,7 +9,7 @@ Official examples and starter templates for [PushFlo](https://pushflo.dev) - rea
 
 ```bash
 # Clone a specific example
-npx degit pushflo/examples/frameworks/nextjs my-app
+npx degit PushFlo/pushflo-examples/frameworks/nextjs my-app
 cd my-app
 npm install
 npm run dev
@@ -108,7 +108,7 @@ VITE_PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx          # Vite
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/pushflo/examples.git
+   git clone https://github.com/PushFlo/pushflo-examples.git
    cd examples
    ```
 

@@ -61,7 +61,7 @@ npm run dev`}</code>
 
       <div className="mt-8 text-center text-sm text-gray-500">
         <a
-          href="https://github.com/pushflo/examples/tree/main/frameworks/nextjs"
+          href="https://github.com/PushFlo/pushflo-examples/tree/main/frameworks/nextjs"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-blue-600"

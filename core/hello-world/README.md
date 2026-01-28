@@ -18,7 +18,7 @@ The simplest possible PushFlo example: a Node.js publisher and an HTML subscribe
 
 ```bash
 # Clone this example
-npx degit pushflo/examples/core/hello-world my-hello-world
+npx degit PushFlo/pushflo-examples/core/hello-world my-hello-world
 cd my-hello-world
 
 # Install dependencies

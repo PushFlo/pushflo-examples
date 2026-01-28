@@ -1,7 +1,7 @@
 # PushFlo + Next.js 14 Example
 
-[![Open in CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/pushflo/examples/tree/main/frameworks/nextjs)
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pushflo/examples/tree/main/frameworks/nextjs)
+[![Open in CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/PushFlo/pushflo-examples/tree/main/frameworks/nextjs)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/PushFlo/pushflo-examples/tree/main/frameworks/nextjs)
 
 Real-time messaging with PushFlo using Next.js 14 App Router, Server Actions, and React hooks.
 
@@ -21,7 +21,7 @@ Real-time messaging with PushFlo using Next.js 14 App Router, Server Actions, an
 
 ```bash
 # Clone this example
-npx degit pushflo/examples/frameworks/nextjs my-pushflo-app
+npx degit PushFlo/pushflo-examples/frameworks/nextjs my-pushflo-app
 cd my-pushflo-app
 
 # Install dependencies
