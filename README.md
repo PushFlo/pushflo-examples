@@ -24,9 +24,7 @@ Fundamental patterns for PushFlo integration.
 | Example | Description | Stack |
 |---------|-------------|-------|
 | [hello-world](./core/hello-world) | Minimal pub/sub example | Node.js + HTML |
-| [presence](./core/presence) | Track online users per channel | Node.js |
-| [history](./core/history) | Paginated message history | Node.js |
-| [dashboard-demo](./core/dashboard-demo) | Connection stats visualization | Chart.js |
+| [vanilla-js](./core/vanilla-js) | No build tools | Single HTML file |
 
 ### Framework Templates
 
@@ -37,18 +35,6 @@ Production-ready starter templates.
 | [Next.js](./frameworks/nextjs) | Next.js 14 App Router | TypeScript, Server Actions, Hooks |
 | [Express](./frameworks/express) | Express.js REST API | TypeScript, Publish endpoints |
 | [React + Vite](./frameworks/react-vite) | Modern React setup | TypeScript, Hooks, Fast HMR |
-| [Vanilla JS](./frameworks/vanilla-js) | No build tools | CDN SDK, Single HTML file |
-
-### Use Cases
-
-Real-world application examples.
-
-| Use Case | Description | Features |
-|----------|-------------|----------|
-| [Chat App](./use-cases/chat-app) | Multi-room chat | Rooms, User list, Typing indicators |
-| [Notifications](./use-cases/notifications) | Toast notification system | Auto-dismiss, Queue, Persistence |
-| [Live Feed](./use-cases/live-feed) | Activity feed / timeline | Infinite scroll, Real-time updates |
-| [IoT Dashboard](./use-cases/iot-dashboard) | Sensor monitoring | Simulated sensors, Charts |
 
 ### API Collections
 
@@ -109,7 +95,7 @@ VITE_PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx          # Vite
 1. Clone the repository:
    ```bash
    git clone https://github.com/PushFlo/pushflo-examples.git
-   cd examples
+   cd pushflo-examples
    ```
 
 2. Navigate to an example:
