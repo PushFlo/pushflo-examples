@@ -227,7 +227,7 @@ const CONFIG = {
 
 - [Hello World](../hello-world) - Add a Node.js publisher
 - [React + Vite](../../frameworks/react-vite) - Framework integration
-- [Chat App](../../use-cases/chat-app) - Full chat example
+- [Express backend](../../frameworks/express) - REST API for publishing
 
 ## License
 

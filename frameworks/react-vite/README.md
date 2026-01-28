@@ -194,7 +194,7 @@ Restart the dev server after adding environment variables.
 
 - [Express backend](../express) - Set up a publishing server
 - [Next.js full-stack](../nextjs) - Server Actions integration
-- [Chat application](../../use-cases/chat-app) - Complete chat example
+- [Hello World](../../core/hello-world) - Minimal pub/sub example
 
 ## License
 

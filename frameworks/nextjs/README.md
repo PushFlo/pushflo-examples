@@ -180,9 +180,9 @@ The secret key is only available on the server. Make sure:
 
 ## Next Steps
 
-- [Add presence tracking](../presence) - Show online users
-- [Message history](../history) - Load previous messages
-- [Chat application](../../use-cases/chat-app) - Full chat example
+- [Express backend](../express) - REST API for publishing
+- [React + Vite](../react-vite) - Lightweight React setup
+- [Hello World](../../core/hello-world) - Minimal pub/sub example
 
 ## License
 
