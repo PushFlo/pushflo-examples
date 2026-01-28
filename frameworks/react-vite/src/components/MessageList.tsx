@@ -1,4 +1,4 @@
-import type { Message } from '@pushflo/sdk'
+import type { Message } from '@pushflodev/sdk'
 
 interface MessageListProps {
   messages: Message[]

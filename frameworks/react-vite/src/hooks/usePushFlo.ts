@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { PushFloClient, type Message, type ConnectionState } from '@pushflo/sdk'
+import { PushFloClient, type Message, type ConnectionState } from '@pushflodev/sdk'
 
 interface UsePushFloOptions {
   debug?: boolean

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
-import type { Message } from '@pushflo/sdk'
+import type { Message } from '@pushflodev/sdk'
 import { usePushFlo } from '@/hooks/use-pushflo'
 import { ConnectionStatus } from '@/components/connection-status'
 import { MessageList } from '@/components/message-list'

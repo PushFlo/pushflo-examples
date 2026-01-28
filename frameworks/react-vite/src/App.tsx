@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { Message } from '@pushflo/sdk'
+import type { Message } from '@pushflodev/sdk'
 import { usePushFlo } from './hooks/usePushFlo'
 import { ConnectionStatus } from './components/ConnectionStatus'
 import { MessageList } from './components/MessageList'

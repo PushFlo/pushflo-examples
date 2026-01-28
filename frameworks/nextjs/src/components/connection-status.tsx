@@ -1,6 +1,6 @@
 'use client'
 
-import type { ConnectionState } from '@pushflo/sdk'
+import type { ConnectionState } from '@pushflodev/sdk'
 
 interface ConnectionStatusProps {
   state: ConnectionState

@@ -3,7 +3,7 @@
  * Server-side client for publishing messages
  */
 
-import { PushFloServer } from '@pushflo/sdk/server'
+import { PushFloServer } from '@pushflodev/sdk/server'
 
 // Create a singleton instance for server-side use
 let serverClient: PushFloServer | null = null
@@ -20,7 +20,6 @@ export function getPushFloServer(): PushFloServer {
     }
 
     serverClient = new PushFloServer({
-      publishKey: process.env.NEXT_PUBLIC_PUSHFLO_PUBLISH_KEY || '',
       secretKey,
       baseUrl,
     })
@@ -42,7 +41,6 @@ export async function publishMessage(
 
   const result = await server.publish(channel, content, {
     eventType,
-    clientId: 'nextjs-server',
   })
 
   return {

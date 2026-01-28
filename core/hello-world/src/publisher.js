@@ -6,11 +6,10 @@
  */
 
 import 'dotenv/config'
-import { PushFloServer } from '@pushflo/sdk/server'
+import { PushFloServer } from '@pushflodev/sdk/server'
 
 // Check for required environment variables
 const secretKey = process.env.PUSHFLO_SECRET_KEY
-const publishKey = process.env.PUSHFLO_PUBLISH_KEY
 
 if (!secretKey) {
   console.error('Error: PUSHFLO_SECRET_KEY is required')
@@ -21,7 +20,6 @@ if (!secretKey) {
 // Initialize PushFlo server client
 const pushflo = new PushFloServer({
   secretKey,
-  publishKey: publishKey || '',
   baseUrl: process.env.PUSHFLO_BASE_URL,
 })
 
@@ -49,7 +47,6 @@ async function publishMessage() {
   try {
     const result = await pushflo.publish(CHANNEL, content, {
       eventType: 'hello',
-      clientId: 'node-publisher',
     })
 
     console.log(`[${messageCount}] Published: "Hello, World!" (delivered to ${result.delivered} clients)`)

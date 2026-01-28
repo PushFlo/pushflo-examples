@@ -79,6 +79,18 @@ channels.set('chat', {
   updatedAt: new Date().toISOString(),
 })
 
+channels.set('hello', {
+  id: uuidv4(),
+  name: 'Hello',
+  slug: 'hello',
+  description: 'Hello world channel',
+  isPrivate: false,
+  metadata: null,
+  messageCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+})
+
 // Helper functions
 function success<T>(data: T, status = 200) {
   return { status, body: { success: true, data } }
@@ -313,16 +325,18 @@ app.post(
 
     const { eventType, clientId, content } = req.body
 
-    if (!clientId || !content) {
-      const result = error('clientId and content are required')
+    if (!content) {
+      const result = error('content is required')
       return res.status(result.status).json(result.body)
     }
+
+    const resolvedClientId = clientId || 'sdk-server'
 
     const message: Message = {
       id: `msg_${uuidv4().slice(0, 12)}`,
       channelSlug: req.params.slug,
       eventType: eventType || 'message',
-      clientId,
+      clientId: resolvedClientId,
       content,
       createdAt: new Date().toISOString(),
     }
@@ -472,6 +486,7 @@ server.listen(PORT, () => {
   console.log('\nPre-configured channels:')
   console.log('  - notifications')
   console.log('  - chat')
+  console.log('  - hello')
   console.log('\nTest credentials:')
   console.log('  Publish key: pub_test_key')
   console.log('  Secret key:  sec_test_key')

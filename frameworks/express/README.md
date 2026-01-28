@@ -134,11 +134,10 @@ curl http://localhost:3000/channels/notifications/messages?page=1&pageSize=20
 
 **Initialize PushFlo Client:**
 ```typescript
-import { PushFloServer } from '@pushflo/sdk/server'
+import { PushFloServer } from '@pushflodev/sdk/server'
 
 const pushflo = new PushFloServer({
   secretKey: process.env.PUSHFLO_SECRET_KEY,
-  publishKey: process.env.PUSHFLO_PUBLISH_KEY,
 })
 ```
 
@@ -149,7 +148,6 @@ const result = await pushflo.publish('my-channel', {
   userId: 123,
 }, {
   eventType: 'chat.message',
-  clientId: 'express-server',
 })
 
 console.log(`Delivered to ${result.delivered} clients`)
@@ -169,7 +167,6 @@ const channel = await pushflo.createChannel({
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `PUSHFLO_SECRET_KEY` | Yes | Secret key for publishing |
-| `PUSHFLO_PUBLISH_KEY` | No | Publish key (for token generation) |
 | `PUSHFLO_BASE_URL` | No | Custom API URL |
 | `PORT` | No | Server port (default: 3000) |
 

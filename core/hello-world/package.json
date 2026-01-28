@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@pushflo/sdk": "^0.1.0"
+    "@pushflodev/sdk": "^1.0.2"
   },
   "devDependencies": {
     "vitest": "1.2.2"

@@ -161,7 +161,7 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 - [PushFlo Documentation](https://docs.pushflo.dev)
 - [PushFlo Console](https://console.pushflo.dev)
 - [API Reference](https://console.pushflo.dev/api-reference)
-- [@pushflo/sdk on npm](https://www.npmjs.com/package/@pushflo/sdk)
+- [@pushflodev/sdk on npm](https://www.npmjs.com/package/@pushflodev/sdk)
 
 ## License
 

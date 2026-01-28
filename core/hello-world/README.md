@@ -79,7 +79,7 @@ Watch messages appear in real-time in your browser!
 ### Publishing (Node.js)
 
 ```javascript
-import { PushFloServer } from '@pushflo/sdk/server'
+import { PushFloServer } from '@pushflodev/sdk/server'
 
 const pushflo = new PushFloServer({
   secretKey: process.env.PUSHFLO_SECRET_KEY,

@@ -11,11 +11,10 @@ import 'dotenv/config'
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import { z } from 'zod'
-import { PushFloServer } from '@pushflo/sdk/server'
+import { PushFloServer } from '@pushflodev/sdk/server'
 
 // Validate environment
 const secretKey = process.env.PUSHFLO_SECRET_KEY
-const publishKey = process.env.PUSHFLO_PUBLISH_KEY
 
 if (!secretKey) {
   console.error('PUSHFLO_SECRET_KEY environment variable is required')
@@ -26,7 +25,6 @@ if (!secretKey) {
 // Initialize PushFlo client
 const pushflo = new PushFloServer({
   secretKey,
-  publishKey: publishKey || '',
   baseUrl: process.env.PUSHFLO_BASE_URL,
 })
 
@@ -39,7 +37,6 @@ app.use(express.json())
 const publishMessageSchema = z.object({
   content: z.record(z.unknown()),
   eventType: z.string().optional().default('message'),
-  clientId: z.string().optional().default('express-server'),
 })
 
 const createChannelSchema = z.object({
@@ -143,11 +140,10 @@ app.post(
       })
     }
 
-    const { content, eventType, clientId } = parsed.data
+    const { content, eventType } = parsed.data
 
     const result = await pushflo.publish(req.params.slug, content, {
       eventType,
-      clientId,
     })
 
     res.status(201).json({
