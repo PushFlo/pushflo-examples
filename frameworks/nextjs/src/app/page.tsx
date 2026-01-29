@@ -70,7 +70,7 @@ npm run dev`}</code>
         </a>
         <span className="mx-2">|</span>
         <a
-          href="https://docs.pushflo.dev"
+          href="https://www.pushflo.dev/docs"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-blue-600"

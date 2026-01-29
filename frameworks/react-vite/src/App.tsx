@@ -82,7 +82,7 @@ function App() {
         </a>
         {' | '}
         <a
-          href="https://docs.pushflo.dev"
+          href="https://www.pushflo.dev/docs"
           target="_blank"
           rel="noopener noreferrer"
         >
