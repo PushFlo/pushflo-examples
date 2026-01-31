@@ -32,21 +32,17 @@ cp env.example .env
 # PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx
 ```
 
-### Terminal 1: Start the subscriber (browser)
+### Terminal 1: Start the web UI
 
 ```bash
-# Serve the HTML file
 npm run serve
 ```
 
 Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-**Important:** Edit `index.html` and replace `YOUR_PUBLISH_KEY_HERE` with your actual publish key.
-
 ### Terminal 2: Start the publisher
 
 ```bash
-# Publish messages
 npm start
 ```
 
@@ -56,20 +52,27 @@ Watch messages appear in real-time in your browser!
 
 ```
 ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│                 │      │                 │      │                 │
 │   publisher.js  │─────►│   PushFlo       │◄────►│   index.html    │
 │   (Node.js)     │ REST │   Edge Network  │  WS  │   (Browser)     │
-│                 │      │                 │      │                 │
-└─────────────────┘      └─────────────────┘      └─────────────────┘
+└─────────────────┘      └─────────────────┘      └────────▲────────┘
+                                                           │
+┌─────────────────┐                                        │
+│   serve.js      │◄───────── /api/token ──────────────────┘
+│   (Web Server)  │
+└─────────────────┘
 ```
 
-1. **Publisher** (`src/publisher.js`):
+1. **Web Server** (`src/serve.js`):
+   - Serves the HTML frontend
+   - Provides `/api/token` endpoint for browser authentication
+
+2. **Publisher** (`src/publisher.js`):
    - Uses the secret key to authenticate
    - Publishes "Hello, World!" messages every 3 seconds
    - Sends to the `hello` channel
 
-2. **Subscriber** (`index.html`):
-   - Gets a connection token using the publish key
+3. **Subscriber** (`index.html`):
+   - Gets a connection token from local server
    - Connects via WebSocket
    - Subscribes to the `hello` channel
    - Displays messages in real-time
@@ -94,14 +97,13 @@ await pushflo.publish('hello', {
 ### Subscribing (Browser)
 
 ```javascript
-// Get token
-const { data: { token, endpoint } } = await fetch('/api/v1/auth/token', {
+// Get token from local server
+const { data: { token, endpoint } } = await fetch('/api/token', {
   method: 'POST',
-  body: JSON.stringify({ publishKey: 'pub_xxx' }),
 }).then(r => r.json())
 
 // Connect WebSocket
-const ws = new WebSocket(`${endpoint}?token=${token}`)
+const ws = new WebSocket(`${endpoint}/ws?token=${token}`)
 
 ws.onmessage = (event) => {
   const msg = JSON.parse(event.data)
@@ -111,7 +113,7 @@ ws.onmessage = (event) => {
   }
 
   if (msg.type === 'message') {
-    console.log('Received:', msg.data)
+    console.log('Received:', msg.message.content)
   }
 }
 ```
@@ -120,35 +122,28 @@ ws.onmessage = (event) => {
 
 | File | Description |
 |------|-------------|
+| `src/serve.js` | Express server for web UI and token endpoint |
 | `src/publisher.js` | Node.js script that publishes messages |
 | `index.html` | Browser page that receives messages |
 | `env.example` | Environment variable template |
 
 ## Troubleshooting
 
-### Browser shows "Please edit index.html and add your PUBLISH_KEY"
+### Server shows "PUSHFLO_PUBLISH_KEY is required"
 
-Open `index.html` and find this line:
-```javascript
-const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE'
-```
-
-Replace it with your actual publish key:
-```javascript
-const PUBLISH_KEY = 'pub_xxxxxxxxxxxxx'
-```
-
-### Publisher shows "PUSHFLO_SECRET_KEY is required"
-
-Create a `.env` file with your secret key:
+Create a `.env` file with your keys:
 ```bash
 cp env.example .env
 # Edit .env and add your keys
 ```
 
+### Publisher shows "PUSHFLO_SECRET_KEY is required"
+
+Make sure your `.env` file has the secret key set.
+
 ### No messages appearing
 
-1. Make sure both the publisher and subscriber are running
+1. Make sure both the web server and publisher are running
 2. Check that both are using the `hello` channel
 3. Verify your API keys are correct
 
