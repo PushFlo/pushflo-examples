@@ -2,9 +2,15 @@
   "name": "pushflo-vanilla-js",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "npx serve -l 8080 .",
+    "start": "node src/serve.js",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "vitest": "1.2.2"

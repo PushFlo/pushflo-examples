@@ -256,15 +256,9 @@
 
   <script>
     // ============================================================
-    // CONFIGURATION - Edit these values
+    // CONFIGURATION
     // ============================================================
     const CONFIG = {
-      // Get your key at https://console.pushflo.dev/credentials
-      publishKey: 'YOUR_PUBLISH_KEY_HERE',  // e.g., 'pub_xxxxxxxxxxxxx'
-
-      // API base URL (default for production)
-      baseUrl: 'https://api.pushflo.dev',
-
       // Enable debug logging
       debug: true,
     }
@@ -355,28 +349,15 @@
 
     // Connect to PushFlo
     async function connect() {
-      // Check for placeholder key
-      if (CONFIG.publishKey === 'YOUR_PUBLISH_KEY_HERE') {
-        document.getElementById('messages').innerHTML = `
-          <div class="error-message">
-            <strong>Setup Required</strong><br><br>
-            Edit <code>index.html</code> and replace <code>YOUR_PUBLISH_KEY_HERE</code> with your actual publish key.<br><br>
-            Get one at <a href="https://console.pushflo.dev/credentials" target="_blank">console.pushflo.dev</a>
-          </div>
-        `
-        return
-      }
-
       setStatus('connecting')
       log('Connecting to PushFlo...')
 
       try {
-        // Step 1: Get connection token
-        const tokenRes = await fetch(`${CONFIG.baseUrl}/api/v1/auth/token`, {
+        // Step 1: Get connection token from local server
+        const tokenRes = await fetch('/api/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            publishKey: CONFIG.publishKey,
             clientId: `vanilla-${Math.random().toString(36).slice(2, 10)}`,
           }),
         })
@@ -389,7 +370,7 @@
         log('Got token, endpoint:', data.endpoint)
 
         // Step 2: Connect WebSocket
-        const wsUrl = data.endpoint.replace(/^http/, 'ws') + `?token=${data.token}`
+        const wsUrl = data.endpoint.replace(/^http/, 'ws') + `/ws?token=${data.token}`
         ws = new WebSocket(wsUrl)
 
         ws.onopen = () => {
@@ -415,7 +396,11 @@
               break
 
             case 'message':
-              addMessage(msg.eventType || 'message', msg.data, msg.timestamp || Date.now())
+              const payload = msg.message || msg
+              const eventType = payload.eventType || msg.eventType || 'message'
+              const content = payload.content || payload.data || msg.data
+              const timestamp = payload.timestamp || msg.timestamp || Date.now()
+              addMessage(eventType, content, timestamp)
               break
 
             case 'pong':
