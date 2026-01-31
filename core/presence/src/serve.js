@@ -14,12 +14,11 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const publishKey = process.env.PUSHFLO_PUBLISH_KEY
-const secretKey = process.env.PUSHFLO_SECRET_KEY
 const baseUrl = process.env.PUSHFLO_BASE_URL || 'https://api.pushflo.dev'
 
-if (!publishKey || !secretKey) {
-  console.error('Error: PUSHFLO_PUBLISH_KEY and PUSHFLO_SECRET_KEY are required')
-  console.error('Get your keys at https://console.pushflo.dev/credentials')
+if (!publishKey) {
+  console.error('Error: PUSHFLO_PUBLISH_KEY is required')
+  console.error('Get your key at https://console.pushflo.dev/credentials')
   process.exit(1)
 }
 
