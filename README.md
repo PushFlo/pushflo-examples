@@ -92,6 +92,26 @@ NEXT_PUBLIC_PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx  # Next.js
 VITE_PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx          # Vite
 ```
 
+## Channel Naming Rules
+
+Channel slugs must follow these rules:
+
+- **Lowercase only**: `my-channel` (not `My-Channel`)
+- **Letters, numbers, hyphens**: `channel-123` (not `channel:123` or `channel_123`)
+- **No leading/trailing hyphens**: `my-channel` (not `-channel` or `channel-`)
+- **No consecutive hyphens**: `my-channel` (not `my--channel`)
+- **1-64 characters**
+
+Use the SDK's validation utilities for dynamic channel names:
+
+```typescript
+import { toChannelSlug } from '@pushflodev/sdk';
+
+// Convert dynamic names to valid slugs
+const channelSlug = toChannelSlug('user:123:messages');
+// Result: 'user-123-messages'
+```
+
 ## Running Examples Locally
 
 ### Prerequisites
