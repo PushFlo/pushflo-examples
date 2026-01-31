@@ -95,7 +95,7 @@ async function initializePushFlo() {
     const config = await response.json();
 
     // Dynamically import PushFlo SDK
-    const { PushFloClient } = await import('https://esm.sh/@pushflodev/sdk@1.0.2');
+    const { PushFloClient } = await import('https://esm.sh/@pushflodev/sdk@1.0.3');
 
     // Create client
     pushfloClient = new PushFloClient({
