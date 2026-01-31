@@ -176,16 +176,14 @@
   </div>
 
   <div class="setup">
-    <strong>To simulate presence:</strong><br>
-    1. Add your <code>PUSHFLO_SECRET_KEY</code> to <code>.env</code><br>
-    2. Run <code>npm start</code> in another terminal
+    <strong>Setup:</strong><br>
+    1. Add <code>PUSHFLO_SECRET_KEY</code> to <code>.env</code><br>
+    2. Terminal 1: <code>npm run serve</code> (this UI)<br>
+    3. Terminal 2: <code>npm start</code> (simulator)
   </div>
 
   <script type="module">
-    // IMPORTANT: Replace with your publish key or use environment variable
-    const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE' // e.g., 'pub_xxxxxxxxxxxxx'
-    const BASE_URL = 'https://api.pushflo.dev'
-    const CHANNEL = 'presence:lobby'
+    const CHANNEL = 'presence-lobby'
 
     // Track online users locally
     const onlineUsers = new Map()
@@ -305,31 +303,25 @@
 
     // Connect to PushFlo
     async function connect() {
-      if (PUBLISH_KEY === 'YOUR_PUBLISH_KEY_HERE') {
-        document.getElementById('users').innerHTML = `
-          <div class="empty" style="color: #ef4444;">
-            Please edit index.html and add your PUBLISH_KEY<br>
-            Get one at <a href="https://console.pushflo.dev">console.pushflo.dev</a>
-          </div>
-        `
-        return
-      }
-
       setStatus('connecting')
 
       try {
-        // Get connection token
-        const tokenRes = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+        // Get connection token from local server
+        const tokenRes = await fetch('/api/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publishKey: PUBLISH_KEY }),
+          body: JSON.stringify({}),
         })
 
-        if (!tokenRes.ok) throw new Error('Failed to get token')
+        if (!tokenRes.ok) {
+          const errorData = await tokenRes.json().catch(() => ({}))
+          console.error('Token error:', tokenRes.status, errorData)
+          throw new Error(`Failed to get token: ${tokenRes.status}`)
+        }
         const { data: { token, endpoint } } = await tokenRes.json()
 
         // Connect WebSocket
-        const wsUrl = endpoint.replace('http', 'ws') + `?token=${token}`
+        const wsUrl = endpoint.replace('http', 'ws') + `/ws?token=${token}`
         const ws = new WebSocket(wsUrl)
 
         ws.onopen = () => console.log('WebSocket opened')
@@ -350,15 +342,19 @@
           }
 
           if (msg.type === 'message') {
-            switch (msg.eventType) {
+            const payload = msg.message || msg
+            const eventType = payload.eventType || msg.eventType
+            const data = payload.content || payload.data || msg.data
+
+            switch (eventType) {
               case 'presence:state':
-                handlePresenceState(msg.data)
+                handlePresenceState(data)
                 break
               case 'user:join':
-                handleUserJoin(msg.data)
+                handleUserJoin(data)
                 break
               case 'user:leave':
-                handleUserLeave(msg.data)
+                handleUserLeave(data)
                 break
             }
           }

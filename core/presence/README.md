@@ -33,35 +33,23 @@ cp env.example .env
 # PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx
 ```
 
-### Terminal 1: Start the subscriber (browser)
+### Start the server
 
 ```bash
-# Serve the HTML file
-npm run serve
-```
-
-Open [http://localhost:8080](http://localhost:8080) in your browser.
-
-**Important:** Edit `index.html` and replace `YOUR_PUBLISH_KEY_HERE` with your actual publish key.
-
-### Terminal 2: Start the presence server
-
-```bash
-# Simulate user presence
 npm start
 ```
 
-Watch users join and leave in real-time in your browser!
+Open [http://localhost:8080](http://localhost:8080) in your browser and watch users join and leave in real-time!
 
 ## How It Works
 
 ```
 ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│                 │      │                 │      │                 │
 │   server.js     │─────►│   PushFlo       │◄────►│   index.html    │
 │   (Node.js)     │ REST │   Edge Network  │  WS  │   (Browser)     │
-│                 │      │                 │      │                 │
-└─────────────────┘      └─────────────────┘      └─────────────────┘
+└────────▲────────┘      └─────────────────┘      └────────┬────────┘
+         │                                                  │
+         └────────────── /api/token (get WS token) ─────────┘
 ```
 
 1. **Server** (`src/server.js`):
@@ -72,9 +60,9 @@ Watch users join and leave in real-time in your browser!
    - Publishes `presence:state` periodically for new subscribers
 
 2. **Subscriber** (`index.html`):
-   - Gets a connection token using the publish key
+   - Gets a connection token from the local server
    - Connects via WebSocket
-   - Subscribes to the `presence:lobby` channel
+   - Subscribes to the `presence-lobby` channel
    - Displays online users with avatars and join times
    - Updates UI in real-time as users join/leave
 
@@ -98,7 +86,7 @@ const pushflo = new PushFloServer({
 })
 
 // User joined
-await pushflo.publish('presence:lobby', {
+await pushflo.publish('presence-lobby', {
   userId: 'user_1',
   userName: 'Alice',
   onlineUsers: [...allOnlineUsers],
@@ -107,7 +95,7 @@ await pushflo.publish('presence:lobby', {
 })
 
 // User left
-await pushflo.publish('presence:lobby', {
+await pushflo.publish('presence-lobby', {
   userId: 'user_1',
   userName: 'Alice',
   onlineUsers: [...remainingUsers],
@@ -119,10 +107,9 @@ await pushflo.publish('presence:lobby', {
 ### Subscribing to Presence (Browser)
 
 ```javascript
-// Get token
-const { data: { token, endpoint } } = await fetch('/api/v1/auth/token', {
+// Get token from backend (backend uses secret key)
+const { data: { token, endpoint } } = await fetch('/api/token', {
   method: 'POST',
-  body: JSON.stringify({ publishKey: 'pub_xxx' }),
 }).then(r => r.json())
 
 // Connect WebSocket
@@ -132,7 +119,7 @@ ws.onmessage = (event) => {
   const msg = JSON.parse(event.data)
 
   if (msg.type === 'connected') {
-    ws.send(JSON.stringify({ type: 'subscribe', channel: 'presence:lobby' }))
+    ws.send(JSON.stringify({ type: 'subscribe', channel: 'presence-lobby' }))
   }
 
   if (msg.type === 'message') {
@@ -161,18 +148,6 @@ ws.onmessage = (event) => {
 
 ## Troubleshooting
 
-### Browser shows "Please edit index.html and add your PUBLISH_KEY"
-
-Open `index.html` and find this line:
-```javascript
-const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE'
-```
-
-Replace it with your actual publish key:
-```javascript
-const PUBLISH_KEY = 'pub_xxxxxxxxxxxxx'
-```
-
 ### Server shows "PUSHFLO_SECRET_KEY is required"
 
 Create a `.env` file with your secret key:
@@ -184,7 +159,7 @@ cp env.example .env
 ### Users not appearing
 
 1. Make sure both the server and subscriber are running
-2. Check that both are using the `presence:lobby` channel
+2. Check that both are using the `presence-lobby` channel
 3. Verify your API keys are correct
 
 ## Next Steps
