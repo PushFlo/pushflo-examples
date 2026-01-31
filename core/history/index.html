@@ -188,17 +188,14 @@
   </div>
 
   <div class="setup">
-    <strong>To populate messages:</strong><br>
-    1. Add your <code>PUSHFLO_SECRET_KEY</code> to <code>.env</code><br>
-    2. Run <code>npm start -- --publish 20</code> to publish sample messages<br>
-    3. Click "Load History" above to see paginated history
+    <strong>Setup:</strong><br>
+    1. Add keys to <code>.env</code><br>
+    2. Terminal 1: <code>npm run serve</code> (this UI)<br>
+    3. Terminal 2: <code>npm run publish</code> to add sample messages<br>
+    4. Click "Load History" above
   </div>
 
   <script type="module">
-    // IMPORTANT: Replace with your keys
-    const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE' // e.g., 'pub_xxxxxxxxxxxxx'
-    const SECRET_KEY = 'YOUR_SECRET_KEY_HERE' // e.g., 'sec_xxxxxxxxxxxxx' (for history API)
-    const BASE_URL = 'https://api.pushflo.dev'
     const CHANNEL = 'history-demo'
     const PAGE_SIZE = 10
 
@@ -297,30 +294,20 @@
       updatePaginationInfo()
     }
 
-    // Fetch message history from server
+    // Fetch message history from local server (which proxies to PushFlo)
     async function fetchHistory(page = 1) {
-      if (SECRET_KEY === 'YOUR_SECRET_KEY_HERE') {
-        alert('Please edit index.html and add your SECRET_KEY')
-        return
-      }
-
       setStatus('loading', 'Loading history...')
 
       try {
-        const url = `${BASE_URL}/api/v1/channels/${CHANNEL}/messages?page=${page}&pageSize=${PAGE_SIZE}`
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${SECRET_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        })
+        const url = `/api/history/${CHANNEL}?page=${page}&pageSize=${PAGE_SIZE}`
+        const response = await fetch(url)
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
 
         const result = await response.json()
-        const { messages, pagination } = result.data || result
+        const { data, pagination } = result
 
         currentPage = pagination.page
         totalPages = pagination.totalPages
@@ -332,7 +319,7 @@
         }
 
         // Messages are returned newest first, display in same order
-        for (const msg of messages) {
+        for (const msg of data) {
           addMessage(msg, false, false)
         }
 
@@ -354,26 +341,21 @@
 
     // Connect to WebSocket for real-time updates
     async function connectWebSocket() {
-      if (PUBLISH_KEY === 'YOUR_PUBLISH_KEY_HERE') {
-        console.log('Skipping WebSocket: no publish key configured')
-        return
-      }
-
       setStatus('connecting')
 
       try {
-        // Get connection token
-        const tokenRes = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+        // Get connection token from local server
+        const tokenRes = await fetch('/api/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publishKey: PUBLISH_KEY }),
+          body: JSON.stringify({}),
         })
 
         if (!tokenRes.ok) throw new Error('Failed to get token')
         const { data: { token, endpoint } } = await tokenRes.json()
 
         // Connect WebSocket
-        const wsUrl = endpoint.replace('http', 'ws') + `?token=${token}`
+        const wsUrl = endpoint.replace('http', 'ws') + `/ws?token=${token}`
         ws = new WebSocket(wsUrl)
 
         ws.onopen = () => console.log('WebSocket opened')
@@ -391,12 +373,17 @@
           }
 
           if (msg.type === 'message') {
-            // Add real-time message at the top
+            const payload = msg.message || msg
+            const messageId = payload.id || msg.messageId || `msg_${Date.now()}`
+            const eventType = payload.eventType || msg.eventType || 'message'
+            const content = payload.content || payload.data || msg.data
+            const timestamp = payload.timestamp || msg.timestamp || Date.now()
+
             addMessage({
-              id: msg.id,
-              eventType: msg.eventType,
-              content: msg.data,
-              timestamp: msg.timestamp,
+              id: messageId,
+              eventType: eventType,
+              content: content,
+              timestamp: timestamp,
             }, true, true)
             totalMessages++
             updatePaginationInfo()

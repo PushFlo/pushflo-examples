@@ -33,49 +33,49 @@ cp env.example .env
 # PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx
 ```
 
-### Terminal 1: Publish some messages
+### Terminal 1: Start the web UI
 
 ```bash
-# Publish 20 sample messages to create history
-npm start -- --publish 20
-```
-
-### Terminal 2: View in browser
-
-```bash
-# Serve the HTML file
 npm run serve
 ```
 
 Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-**Important:** Edit `index.html` and replace both `YOUR_SECRET_KEY_HERE` and `YOUR_PUBLISH_KEY_HERE` with your actual keys.
+### Terminal 2: Publish some messages
+
+```bash
+# Publish 10 sample messages to create history
+npm run publish
+```
+
+Then click "Load History" in the browser to see them!
 
 ## How It Works
 
 ```
 ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│                 │      │                 │      │                 │
 │   server.js     │─────►│   PushFlo       │◄────►│   index.html    │
-│   (Node.js)     │ REST │   Edge Network  │  WS  │   (Browser)     │
-│                 │      │                 │      │                 │
-└─────────────────┘      └─────────────────┘      └─────────────────┘
-     │                          │                        │
-     │ publish()                │                        │
-     │                          │                        │ GET /messages
-     │                          │◄───────────────────────│ (history)
-     │                          │                        │
-     │                          │────────────────────────► WebSocket
-     │                          │                        │ (real-time)
+│   (Publisher)   │ REST │   Edge Network  │  WS  │   (Browser)     │
+└─────────────────┘      └─────────────────┘      └────────▲────────┘
+                                                           │
+┌─────────────────┐                                        │
+│   serve.js      │◄───────── /api/token ──────────────────┤
+│   (Web Server)  │◄───────── /api/history ────────────────┘
+└─────────────────┘
 ```
 
-1. **Server** (`src/server.js`):
+1. **Web Server** (`src/serve.js`):
+   - Serves the HTML frontend
+   - Provides `/api/token` for WebSocket connection
+   - Provides `/api/history/:channel` proxy (keeps secret key server-side)
+
+2. **Publisher** (`src/server.js`):
    - Uses the secret key to authenticate
    - Publishes sample messages to the `history-demo` channel
-   - Demonstrates fetching history with `getMessageHistory()`
+   - Can also fetch and display history from command line
 
-2. **Browser** (`index.html`):
-   - Fetches paginated history via REST API
+3. **Browser** (`index.html`):
+   - Fetches history via local `/api/history` endpoint
    - Connects via WebSocket for real-time updates
    - Shows historical messages marked as "HISTORY"
    - Shows new messages marked as "LIVE"
@@ -99,107 +99,77 @@ const { messages, pagination } = await pushflo.getMessageHistory('history-demo',
 
 console.log(`Found ${pagination.total} total messages`)
 console.log(`Page ${pagination.page} of ${pagination.totalPages}`)
-
-// Fetch next page
-if (pagination.page < pagination.totalPages) {
-  const page2 = await pushflo.getMessageHistory('history-demo', {
-    pageSize: 10,
-    page: 2,
-  })
-}
 ```
 
-### Fetching History (Browser)
+### Fetching History (Browser via proxy)
 
 ```javascript
-// Fetch history via REST API
-const response = await fetch(`${BASE_URL}/api/v1/channels/history-demo/messages?page=1&pageSize=10`, {
-  headers: {
-    'Authorization': `Bearer ${SECRET_KEY}`,
-  },
-})
-
-const { data: { messages, pagination } } = await response.json()
+// Fetch history via local server proxy
+const response = await fetch('/api/history/history-demo?page=1&pageSize=10')
+const { data, pagination } = await response.json()
 
 // Display messages
-for (const msg of messages) {
+for (const msg of data) {
   console.log(`[${msg.timestamp}] ${msg.content.text}`)
 }
-
-// Load more if available
-if (pagination.page < pagination.totalPages) {
-  // Fetch page 2...
-}
-```
-
-### Message History Options
-
-```javascript
-await pushflo.getMessageHistory(channel, {
-  page: 1,           // Page number (1-indexed)
-  pageSize: 10,      // Items per page (default: 20)
-  eventType: 'chat', // Filter by event type
-  after: 1704067200000,  // Messages after timestamp
-  before: 1704153600000, // Messages before timestamp
-})
 ```
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `src/server.js` | Node.js script that publishes messages and fetches history |
-| `index.html` | Browser page showing paginated history + real-time updates |
+| `src/serve.js` | Express server for web UI and API proxy |
+| `src/server.js` | Node.js script that publishes messages |
+| `index.html` | Browser page showing paginated history + real-time |
 | `env.example` | Environment variable template |
-| `test/smoke.test.js` | Basic smoke tests |
-
-## Troubleshooting
-
-### "Please edit index.html and add your SECRET_KEY"
-
-Open `index.html` and find these lines:
-```javascript
-const PUBLISH_KEY = 'YOUR_PUBLISH_KEY_HERE'
-const SECRET_KEY = 'YOUR_SECRET_KEY_HERE'
-```
-
-Replace them with your actual keys.
-
-### No messages in history
-
-1. Make sure you've published some messages first:
-   ```bash
-   npm start -- --publish 20
-   ```
-2. Check that the channel name matches (`history-demo`)
-3. Verify your SECRET_KEY is correct
-
-### Publisher shows "PUSHFLO_SECRET_KEY is required"
-
-Create a `.env` file with your secret key:
-```bash
-cp env.example .env
-# Edit .env and add your keys
-```
 
 ## CLI Options
 
 ```bash
+# Start the web UI server
+npm run serve
+
+# Publish 10 sample messages
+npm run publish
+
 # Publish N sample messages
 npm start -- --publish 20
 
-# Fetch and display history
+# Fetch and display history (CLI)
 npm start -- --fetch
 
 # Default: publish 3 messages then show history
 npm start
 ```
 
+## Troubleshooting
+
+### Server shows "PUSHFLO_PUBLISH_KEY and PUSHFLO_SECRET_KEY are required"
+
+Create a `.env` file with your keys:
+```bash
+cp env.example .env
+# Edit .env and add your keys
+```
+
+### No messages in history
+
+1. Make sure you've published some messages first:
+   ```bash
+   npm run publish
+   ```
+2. Check that the channel name matches (`history-demo`)
+3. Verify your keys are correct
+
+### History API returns error
+
+Make sure your `PUSHFLO_SECRET_KEY` is valid - the history API requires server authentication.
+
 ## Next Steps
 
 - [Hello World](../hello-world) - Simplest pub/sub example
-- [Vanilla JS](../vanilla-js) - Single HTML file example
-- [React + Vite](../../frameworks/react-vite) - Modern React setup
+- [Presence tracking](../presence) - Show online users
+- [Vanilla JS](../vanilla-js) - Browser-only subscriber
 
 ## License
 
