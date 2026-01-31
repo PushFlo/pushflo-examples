@@ -252,7 +252,7 @@
         <div class="message-header">
           <span>${message.eventType || 'message'}</span>
           <span class="message-source">${isRealtime ? 'LIVE' : 'HISTORY'}</span>
-          <span>${formatTime(message.timestamp)}</span>
+          <span>${formatTime(message.createdAt || message.timestamp)}</span>
         </div>
         <div class="message-content">${text}</div>
         <div class="message-id">ID: ${message.id}</div>
@@ -307,7 +307,7 @@
         }
 
         const result = await response.json()
-        const { data, pagination } = result
+        const { items, pagination } = result.data
 
         currentPage = pagination.page
         totalPages = pagination.totalPages
@@ -319,7 +319,7 @@
         }
 
         // Messages are returned newest first, display in same order
-        for (const msg of data) {
+        for (const msg of items) {
           addMessage(msg, false, false)
         }
 
