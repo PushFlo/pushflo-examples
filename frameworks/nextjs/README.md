@@ -15,7 +15,7 @@ Real-time messaging with PushFlo using Next.js 14 App Router, Server Actions, an
 ## Prerequisites
 
 - Node.js 18+
-- PushFlo API keys from [console.pushflo.dev](https://console.pushflo.dev)
+- PushFlo API keys from [console.pushflo.dev/credentials](https://console.pushflo.dev/credentials)
 
 ## Quick Start
 
@@ -99,8 +99,13 @@ export default function MyComponent() {
 
 import { publishMessage } from '@/lib/pushflo-server'
 
-export async function publishMessageAction(channel: string, content: object) {
-  return await publishMessage(channel, content)
+export async function publishMessageAction(
+  channel: string,
+  contentJson: string,
+  eventType: string
+) {
+  const content = JSON.parse(contentJson)
+  return await publishMessage(channel, content, eventType)
 }
 ```
 
@@ -109,7 +114,11 @@ export async function publishMessageAction(channel: string, content: object) {
 import { publishMessageAction } from './actions'
 
 async function handlePublish() {
-  await publishMessageAction('my-channel', { text: 'Hello!' })
+  await publishMessageAction(
+    'my-channel',
+    JSON.stringify({ text: 'Hello!' }),
+    'message'
+  )
 }
 ```
 
