@@ -84,7 +84,8 @@ export function usePushFlo(options: UsePushFloOptions = {}): UsePushFloReturn {
           if (subscriptions) {
             subscriptions.handleMessage(normalizedMessage)
           }
-          ;(client as any).emit('message', normalizedMessage)
+          const emitter = client as any
+          emitter.emit('message', normalizedMessage)
         }
       })
     }
