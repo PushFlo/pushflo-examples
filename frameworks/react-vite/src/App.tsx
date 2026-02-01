@@ -7,7 +7,7 @@ import { MessageList } from './components/MessageList'
 function App() {
   const [channel, setChannel] = useState('notifications')
   const [messages, setMessages] = useState<Message[]>([])
-  const { connectionState, subscribe } = usePushFlo({ debug: true })
+  const { connectionState, subscribe } = usePushFlo()
 
   const handleMessage = useCallback((message: Message) => {
     setMessages((prev) => [message, ...prev].slice(0, 50))
@@ -90,7 +90,7 @@ function App() {
         </a>
         {' | '}
         <a
-          href="https://console.pushflo.dev"
+          href="https://console.pushflo.dev/credentials"
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -43,6 +43,33 @@ export function usePushFlo(options: UsePushFloOptions = {}): UsePushFloReturn {
       setConnectionState(state)
     })
 
+    // Workaround for SDK bug: SDK expects message.message but server sends flat structure
+    // Listen to raw WebSocket messages via wsManager
+    const wsManager = (client as any).wsManager
+    if (wsManager) {
+      wsManager.on('message', (rawMsg: any) => {
+        // Handle the flat message format that the SDK doesn't handle correctly
+        if (rawMsg.type === 'message' && rawMsg.channel && !rawMsg.message) {
+          // Server sends: { type, channel, messageId, data, eventType, clientId, timestamp }
+          // SDK expects: { type, channel, message: { id, content, eventType, clientId, timestamp } }
+          const normalizedMessage = {
+            id: rawMsg.messageId || rawMsg.id,
+            channel: rawMsg.channel,
+            eventType: rawMsg.eventType,
+            clientId: rawMsg.clientId,
+            content: rawMsg.data || rawMsg.content,
+            timestamp: rawMsg.timestamp,
+          }
+          // Manually dispatch to subscriptions
+          const subscriptions = (client as any).subscriptions
+          if (subscriptions) {
+            subscriptions.handleMessage(normalizedMessage)
+          }
+          ;(client as any).emit('message', normalizedMessage)
+        }
+      })
+    }
+
     if (autoConnect) {
       client.connect().catch((error) => {
         console.error('Failed to connect to PushFlo:', error)
