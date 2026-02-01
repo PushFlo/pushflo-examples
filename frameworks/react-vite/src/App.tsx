@@ -54,6 +54,31 @@ function App() {
       </div>
 
       <div className="info-box">
+        <h3>Try it out</h3>
+        <ol>
+          <li>
+            Make sure the channel above exists in your{' '}
+            <a href="https://console.pushflo.dev/channels" target="_blank" rel="noopener noreferrer">
+              PushFlo dashboard
+            </a>
+          </li>
+          <li>
+            Go to the{' '}
+            <a href="https://console.pushflo.dev/console" target="_blank" rel="noopener noreferrer">
+              PushFlo Console
+            </a>{' '}
+            to send a test message
+          </li>
+          <li>
+            Select the same channel and click "Send Message"
+          </li>
+          <li>
+            Watch the message appear here instantly!
+          </li>
+        </ol>
+      </div>
+
+      <div className="info-box">
         <h3>How it works</h3>
         <ul>
           <li>
