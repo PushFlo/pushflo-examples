@@ -33,7 +33,17 @@ cp env.example .env
 # PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx
 ```
 
-### Start the server
+### Run the example
+
+This example requires two terminals.
+
+**Terminal 1 - Start the web UI:**
+
+```bash
+npm run serve
+```
+
+**Terminal 2 - Start the presence simulator:**
 
 ```bash
 npm start
@@ -46,22 +56,29 @@ Open [http://localhost:8080](http://localhost:8080) in your browser and watch us
 ```
 ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
 │   server.js     │─────►│   PushFlo       │◄────►│   index.html    │
-│   (Node.js)     │ REST │   Edge Network  │  WS  │   (Browser)     │
-└────────▲────────┘      └─────────────────┘      └────────┬────────┘
-         │                                                  │
-         └────────────── /api/token (get WS token) ─────────┘
+│   (Simulator)   │ REST │   Edge Network  │  WS  │   (Browser)     │
+└─────────────────┘      └─────────────────┘      └────────┬────────┘
+                                                           │
+┌─────────────────┐                                        │
+│   serve.js      │◄───────── /api/token (get WS token) ───┘
+│   (Web Server)  │
+└─────────────────┘
 ```
 
-1. **Server** (`src/server.js`):
-   - Uses the secret key to authenticate
-   - Tracks online users in a Map
+1. **Web Server** (`src/serve.js` - run with `npm run serve`):
+   - Serves the web UI (index.html) on port 8080
+   - Provides `/api/token` endpoint for WebSocket authentication
+
+2. **Presence Simulator** (`src/server.js` - run with `npm start`):
+   - Uses the secret key to publish events
+   - Tracks simulated users in a Map
    - Publishes `user:join` events when users connect
    - Publishes `user:leave` events when users disconnect
    - Publishes `presence:state` periodically for new subscribers
 
-2. **Subscriber** (`index.html`):
+3. **Browser Client** (`index.html`):
    - Gets a connection token from the local server
-   - Connects via WebSocket
+   - Connects via WebSocket to PushFlo
    - Subscribes to the `presence-lobby` channel
    - Displays online users with avatars and join times
    - Updates UI in real-time as users join/leave
@@ -142,7 +159,8 @@ ws.onmessage = (event) => {
 
 | File | Description |
 |------|-------------|
-| `src/server.js` | Node.js script that simulates user presence |
+| `src/serve.js` | Express server for the web UI and token endpoint (`npm run serve`) |
+| `src/server.js` | Presence simulator that publishes join/leave events (`npm start`) |
 | `index.html` | Browser page that displays online users |
 | `env.example` | Environment variable template |
 
@@ -158,7 +176,7 @@ cp env.example .env
 
 ### Users not appearing
 
-1. Make sure both the server and subscriber are running
+1. Make sure both terminals are running (`npm run serve` and `npm start`)
 2. Check that both are using the `presence-lobby` channel
 3. Verify your API keys are correct
 
