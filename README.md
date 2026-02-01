@@ -21,30 +21,36 @@ npm run dev
 
 Fundamental patterns for PushFlo integration.
 
-| Example | Description | Stack |
-|---------|-------------|-------|
-| [hello-world](./core/hello-world) | Minimal pub/sub example | Node.js + HTML |
-| [vanilla-js](./core/vanilla-js) | No build tools | Single HTML file |
-| [presence](./core/presence) | Track online users per channel | Node.js + HTML |
-| [history](./core/history) | Paginated message history | Node.js + HTML |
+| Example | Description | Server | Client |
+|---------|-------------|--------|--------|
+| [hello-world](./core/hello-world) | Minimal pub/sub example | SDK | WebSocket |
+| [vanilla-js](./core/vanilla-js) | No build tools, single HTML file | — | WebSocket |
+| [presence](./core/presence) | Track online users per channel | SDK | WebSocket |
+| [history](./core/history) | Paginated message history | SDK | WebSocket |
 
 ### Framework Templates
 
 Production-ready starter templates.
 
-| Framework | Description | Features |
-|-----------|-------------|----------|
-| [Next.js](./frameworks/nextjs) | Next.js 14 App Router | TypeScript, Server Actions, Hooks |
-| [Express](./frameworks/express) | Express.js REST API | TypeScript, Publish endpoints |
-| [React + Vite](./frameworks/react-vite) | Modern React setup | TypeScript, Hooks, Fast HMR |
+| Framework | Description | Server | Client |
+|-----------|-------------|--------|--------|
+| [Next.js](./frameworks/nextjs) | Next.js 14 App Router | SDK | SDK |
+| [Express](./frameworks/express) | Express.js REST API | SDK | — |
+| [React + Vite](./frameworks/react-vite) | Modern React setup | — | SDK |
 
 ### Use Cases
 
 Real-world application examples.
 
-| Use Case | Description | Features |
-|----------|-------------|----------|
-| [Chat App](./use-cases/chat-app) | Multi-room chat | Rooms, User list, Real-time messages |
+| Use Case | Description | Server | Client |
+|----------|-------------|--------|--------|
+| [Chat App](./use-cases/chat-app) | Multi-room chat | SDK | SDK |
+
+### SDK Usage Legend
+
+- **SDK** — Uses `@pushflodev/sdk` (`PushFloServer` for server, `PushFloClient` for client)
+- **WebSocket** — Uses raw WebSocket connection (educational, shows the protocol)
+- **—** — Not applicable (e.g., client-only or server-only example)
 
 ### API Collections
 
