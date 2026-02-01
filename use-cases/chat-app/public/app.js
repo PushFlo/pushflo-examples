@@ -94,8 +94,8 @@ async function initializePushFlo() {
     const response = await fetch('/api/config');
     const config = await response.json();
 
-    // Dynamically import PushFlo SDK
-    const { PushFloClient } = await import('https://esm.sh/@pushflodev/sdk@1.0.4');
+    // Dynamically import PushFlo SDK (v1.0.5+ has the fix)
+    const { PushFloClient } = await import('https://esm.sh/@pushflodev/sdk@1.0.5');
 
     // Create client
     pushfloClient = new PushFloClient({
@@ -274,6 +274,8 @@ async function leaveRoom(room) {
  */
 function handleIncomingMessage(message) {
   const { eventType, content } = message;
+
+  console.log('Received message:', { eventType, content });
 
   switch (eventType) {
     case 'chat.message':
