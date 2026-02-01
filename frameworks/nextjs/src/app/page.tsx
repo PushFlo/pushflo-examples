@@ -29,7 +29,7 @@ export default function HomePage() {
         </Link>
 
         <a
-          href="https://console.pushflo.dev"
+          href="https://console.pushflo.dev/credentials"
           target="_blank"
           rel="noopener noreferrer"
           className="block p-6 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all"
