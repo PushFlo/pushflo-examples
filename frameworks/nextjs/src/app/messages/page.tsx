@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import type { Message } from '@pushflodev/sdk'
 import { usePushFlo } from '@/hooks/use-pushflo'
@@ -20,21 +20,16 @@ export default function MessagesPage() {
   }, [])
 
   // Subscribe when connected
-  useState(() => {
+  useEffect(() => {
     if (connectionState === 'connected') {
       return subscribe(channel, handleMessage)
     }
-  })
+  }, [connectionState, channel, subscribe, handleMessage])
 
-  // Re-subscribe when channel changes
+  // Re-subscribe when channel changes (useEffect handles the actual subscription)
   const handleChannelChange = (newChannel: string) => {
     setChannel(newChannel)
     setMessages([]) // Clear messages when switching channels
-
-    if (connectionState === 'connected') {
-      // The old subscription is cleaned up automatically
-      subscribe(newChannel, handleMessage)
-    }
   }
 
   // Handle publish via server action
