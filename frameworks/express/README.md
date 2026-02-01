@@ -6,13 +6,13 @@ A REST API backend demonstrating PushFlo integration with Express.js and TypeScr
 
 - Setting up PushFlo server SDK in Express
 - Creating REST endpoints for publishing messages
-- Managing channels programmatically
+- Fetching message history
 - Input validation with Zod
 
 ## Prerequisites
 
 - Node.js 18+
-- PushFlo API keys from [console.pushflo.dev](https://console.pushflo.dev)
+- PushFlo API keys from [console.pushflo.dev/credentials](https://console.pushflo.dev/credentials)
 
 ## Quick Start
 
@@ -29,7 +29,6 @@ cp env.example .env
 
 # Add your API keys to .env
 # PUSHFLO_SECRET_KEY=sec_xxxxxxxxxxxxx
-# PUSHFLO_PUBLISH_KEY=pub_xxxxxxxxxxxxx
 
 # Start development server
 npm run dev
@@ -42,10 +41,6 @@ The server runs at [http://localhost:3000](http://localhost:3000).
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
-| GET | `/channels` | List all channels |
-| POST | `/channels` | Create a new channel |
-| GET | `/channels/:slug` | Get channel details |
-| DELETE | `/channels/:slug` | Delete a channel |
 | POST | `/channels/:slug/messages` | Publish a message |
 | GET | `/channels/:slug/messages` | Get message history |
 
@@ -76,28 +71,31 @@ Response:
 }
 ```
 
-### Create a Channel
-
-```bash
-curl -X POST http://localhost:3000/channels \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "My Channel",
-    "slug": "my-channel",
-    "description": "Channel for updates"
-  }'
-```
-
-### List Channels
-
-```bash
-curl http://localhost:3000/channels
-```
-
 ### Get Message History
 
 ```bash
 curl http://localhost:3000/channels/notifications/messages?page=1&pageSize=20
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "msg_xxx123",
+      "eventType": "notification",
+      "content": {"type": "alert", "message": "Hello!"},
+      "createdAt": "2025-01-26T12:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
 ```
 
 ## How It Works
@@ -153,13 +151,14 @@ const result = await pushflo.publish('my-channel', {
 console.log(`Delivered to ${result.delivered} clients`)
 ```
 
-**Create a Channel:**
+**Get Message History:**
 ```typescript
-const channel = await pushflo.createChannel({
-  name: 'Notifications',
-  slug: 'notifications',
-  description: 'System notifications',
+const result = await pushflo.getMessageHistory('my-channel', {
+  page: 1,
+  pageSize: 20,
 })
+
+console.log(`Found ${result.pagination.total} messages`)
 ```
 
 ## Environment Variables
@@ -194,20 +193,16 @@ cp env.example .env
 # Edit .env and add your keys
 ```
 
-### Channel not found errors
+### Invalid channel slug
 
-Make sure the channel exists before publishing. Create it first:
-
-```bash
-curl -X POST http://localhost:3000/channels \
-  -H "Content-Type: application/json" \
-  -d '{"name": "My Channel", "slug": "my-channel"}'
-```
+Channel slugs must be lowercase alphanumeric with hyphens only:
+- ✅ `notifications`, `my-channel`, `user-123`
+- ❌ `My Channel`, `user_123`, `ALERTS`
 
 ## Next Steps
 
 - [React frontend](../react-vite) - Connect a React app
-- [Presence tracking](../../core/presence) - Show online users
+- [Next.js example](../nextjs) - Full-stack with Server Actions
 - [Chat application](../../use-cases/chat-app) - Full chat example
 
 ## License

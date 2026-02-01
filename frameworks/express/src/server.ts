@@ -3,7 +3,7 @@
  *
  * A REST API backend that demonstrates:
  * - Publishing messages to PushFlo channels
- * - Managing channels via the API
+ * - Fetching message history
  * - Input validation with Zod
  */
 
@@ -39,11 +39,8 @@ const publishMessageSchema = z.object({
   eventType: z.string().optional().default('message'),
 })
 
-const createChannelSchema = z.object({
-  name: z.string().min(1).max(100),
-  slug: z.string().min(1).max(50).regex(/^[a-z0-9-]+$/),
-  description: z.string().max(500).optional(),
-  isPrivate: z.boolean().optional().default(false),
+const channelSlugSchema = z.string().min(1).max(50).regex(/^[a-z0-9-]+$/, {
+  message: 'Channel slug must be lowercase alphanumeric with hyphens only',
 })
 
 // Error handling middleware
@@ -66,81 +63,31 @@ app.get('/health', (_req: Request, res: Response) => {
 })
 
 /**
- * GET /channels
- * List all channels
- */
-app.get(
-  '/channels',
-  asyncHandler(async (_req: Request, res: Response) => {
-    const result = await pushflo.listChannels()
-    res.json({
-      success: true,
-      data: result.channels,
-      pagination: result.pagination,
-    })
-  })
-)
-
-/**
- * POST /channels
- * Create a new channel
- */
-app.post(
-  '/channels',
-  asyncHandler(async (req: Request, res: Response) => {
-    const parsed = createChannelSchema.safeParse(req.body)
-    if (!parsed.success) {
-      return res.status(400).json({
-        success: false,
-        error: parsed.error.errors[0]?.message || 'Invalid input',
-      })
-    }
-
-    const channel = await pushflo.createChannel(parsed.data)
-    res.status(201).json({ success: true, data: channel })
-  })
-)
-
-/**
- * GET /channels/:slug
- * Get channel details
- */
-app.get(
-  '/channels/:slug',
-  asyncHandler(async (req: Request, res: Response) => {
-    const channel = await pushflo.getChannel(req.params.slug)
-    res.json({ success: true, data: channel })
-  })
-)
-
-/**
- * DELETE /channels/:slug
- * Delete a channel
- */
-app.delete(
-  '/channels/:slug',
-  asyncHandler(async (req: Request, res: Response) => {
-    await pushflo.deleteChannel(req.params.slug)
-    res.status(204).send()
-  })
-)
-
-/**
  * POST /channels/:slug/messages
  * Publish a message to a channel
  */
 app.post(
   '/channels/:slug/messages',
   asyncHandler(async (req: Request, res: Response) => {
-    const parsed = publishMessageSchema.safeParse(req.body)
-    if (!parsed.success) {
+    // Validate channel slug
+    const slugResult = channelSlugSchema.safeParse(req.params.slug)
+    if (!slugResult.success) {
       return res.status(400).json({
         success: false,
-        error: parsed.error.errors[0]?.message || 'Invalid input',
+        error: slugResult.error.errors[0]?.message || 'Invalid channel slug',
       })
     }
 
-    const { content, eventType } = parsed.data
+    // Validate request body
+    const bodyResult = publishMessageSchema.safeParse(req.body)
+    if (!bodyResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: bodyResult.error.errors[0]?.message || 'Invalid input',
+      })
+    }
+
+    const { content, eventType } = bodyResult.data
 
     const result = await pushflo.publish(req.params.slug, content, {
       eventType,
@@ -166,6 +113,15 @@ app.post(
 app.get(
   '/channels/:slug/messages',
   asyncHandler(async (req: Request, res: Response) => {
+    // Validate channel slug
+    const slugResult = channelSlugSchema.safeParse(req.params.slug)
+    if (!slugResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: slugResult.error.errors[0]?.message || 'Invalid channel slug',
+      })
+    }
+
     const page = parseInt(req.query.page as string) || 1
     const pageSize = Math.min(parseInt(req.query.pageSize as string) || 50, 100)
 
@@ -202,12 +158,13 @@ app.listen(PORT, () => {
   console.log('')
   console.log('Endpoints:')
   console.log('  GET  /health                     - Health check')
-  console.log('  GET  /channels                   - List channels')
-  console.log('  POST /channels                   - Create channel')
-  console.log('  GET  /channels/:slug             - Get channel')
-  console.log('  DELETE /channels/:slug           - Delete channel')
   console.log('  POST /channels/:slug/messages    - Publish message')
   console.log('  GET  /channels/:slug/messages    - Get message history')
+  console.log('')
+  console.log('Example - publish a message:')
+  console.log(`  curl -X POST http://localhost:${PORT}/channels/notifications/messages \\`)
+  console.log('    -H "Content-Type: application/json" \\')
+  console.log('    -d \'{"content": {"text": "Hello!"}, "eventType": "greeting"}\'')
 })
 
 export default app
