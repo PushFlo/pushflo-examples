@@ -13,7 +13,7 @@ Demonstrates loading paginated message history from a channel, combined with rea
 ## Prerequisites
 
 - Node.js 18+
-- PushFlo API keys from [console.pushflo.dev](https://console.pushflo.dev)
+- PushFlo API keys from [console.pushflo.dev/credentials](https://console.pushflo.dev/credentials)
 
 ## Quick Start
 

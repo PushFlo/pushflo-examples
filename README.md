@@ -57,7 +57,7 @@ Import into your favorite API client.
 
 ## Getting Your API Keys
 
-1. Sign up at [console.pushflo.dev](https://console.pushflo.dev)
+1. Sign up at [console.pushflo.dev/credentials](https://console.pushflo.dev/credentials)
 2. Create a new organization
 3. Go to **Credentials** and create an API key
 4. Copy your `pub_xxx` (publish key) and `sec_xxx` (secret key)

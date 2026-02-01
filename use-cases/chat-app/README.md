@@ -16,7 +16,7 @@ A full-featured real-time chat application demonstrating PushFlo's capabilities.
 ## Prerequisites
 
 - Node.js 18+
-- A PushFlo account with API keys from [console.pushflo.dev](https://console.pushflo.dev)
+- A PushFlo account with API keys from [console.pushflo.dev/credentials](https://console.pushflo.dev/credentials)
 
 ## Quick Start
 

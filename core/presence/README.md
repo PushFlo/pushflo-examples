@@ -13,7 +13,7 @@ Track online users in real-time using PushFlo. This example demonstrates presenc
 ## Prerequisites
 
 - Node.js 18+
-- PushFlo API keys from [console.pushflo.dev](https://console.pushflo.dev)
+- PushFlo API keys from [console.pushflo.dev/credentials](https://console.pushflo.dev/credentials)
 
 ## Quick Start
 
