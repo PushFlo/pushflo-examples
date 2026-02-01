@@ -148,18 +148,26 @@ frameworks/react-vite/
 └── env.example
 ```
 
-## Publishing Messages
+## Testing the Demo
 
-This example only subscribes to messages. To publish messages, you need a backend:
+The easiest way to test is using the PushFlo Console:
+
+1. Make sure the channel exists in your [PushFlo dashboard](https://console.pushflo.dev/channels)
+2. Go to the [PushFlo Console](https://console.pushflo.dev/console)
+3. Select the same channel (e.g., `notifications`)
+4. Send a test message and watch it appear instantly!
+
+## Publishing Messages from Code
+
+To publish messages programmatically, use your secret key:
 
 ```bash
-# Using curl with your secret key
+# Using curl
 curl -X POST https://api.pushflo.dev/api/v1/channels/notifications/messages \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sec_xxxxxxxxxxxxx" \
   -d '{
     "eventType": "notification",
-    "clientId": "server",
     "content": {"message": "Hello from server!"}
   }'
 ```
